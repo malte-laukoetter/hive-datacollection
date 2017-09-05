@@ -11,17 +11,18 @@ import {PlayerStatsUpdater} from "./PlayerStatsUpdater";
 import {TotalKillsUpdater} from "./kills";
 import {DiscordWebhook} from "./DiscordWebhook"
 
+const config = require("../config.json");
 const serviceAccount = require("../firebase_service_account.json");
 
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://hivewebsite-1da4d.firebaseio.com"
+    databaseURL: config.firebase.databaseURL
 });
 
 const db = admin.database();
 
-new DiscordWebhook("354592602244251649", "W7APn5Z7EtiNOLsvZX4Je4JMS4cQt1Uy7QP5ETQCm2BBGw3huOkLDFNxsJoHuvxIFyyJ");
+new DiscordWebhook(config.discord.webhookId, config.discord.webhookKey);
 
 setMinTimeBetweenRequests(1000);
 console.log("Started!");

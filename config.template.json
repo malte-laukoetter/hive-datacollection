@@ -1,0 +1,9 @@
+{
+  "discord": {
+    "webhookKey": "",
+    "webhookId": ""
+  },
+  "firebase": {
+    "databaseURL": "https://<DATABASE_NAME>.firebaseio.com"
+  }
+}
