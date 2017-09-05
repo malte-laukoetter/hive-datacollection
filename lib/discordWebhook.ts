@@ -8,6 +8,24 @@ const hiveEmoji = `<:a:${config.discord.hiveEmojiId}>`
 
 export class DiscordWebhook {
   private static _instance;
+  private _doSendTeamChange: boolean = true;
+  private _doSendNewMaps: boolean = true;
+
+  set doSendTeamChange(send: boolean){
+    this._doSendTeamChange = send;
+  }
+
+  get doSendTeamChange(){
+    return this._doSendTeamChange;
+  }
+
+  set doSendNewMaps(send: boolean){
+    this._doSendNewMaps = send;
+  }
+
+  get doSendNewMaps(){
+    return this._doSendNewMaps;
+  }
 
   static get instance(): DiscordWebhook{
     return DiscordWebhook._instance;
@@ -31,10 +49,14 @@ export class DiscordWebhook {
   }
 
   sendNewMap(map: GameMap){
+    if(!this.doSendNewMaps) return;
+
     this.send(`${hiveEmoji} **New ${map.gameType.name} Map** ${hiveEmoji}\n${map.mapName} by ${map.author}`);
   }
 
   sendTeamChange(player: Player, type: ChangeType){
+    if (!this.doSendTeamChange) return;
+
     let title = "";
     let body = "";
 

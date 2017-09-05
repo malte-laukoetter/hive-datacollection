@@ -2,7 +2,9 @@
   "discord": {
     "webhookKey": "",
     "webhookId": "",
-    "hiveEmojiId": "292737966651211776"
+    "hiveEmojiId": "292737966651211776",
+    "sendNewMapMessage": true,
+    "sendTeamChangeMessage": true
   },
   "firebase": {
     "databaseURL": "https://<DATABASE_NAME>.firebaseio.com"
