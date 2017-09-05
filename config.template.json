@@ -1,7 +1,8 @@
 {
   "discord": {
     "webhookKey": "",
-    "webhookId": ""
+    "webhookId": "",
+    "hiveEmojiId": "292737966651211776" // community discord hive emoji
   },
   "firebase": {
     "databaseURL": "https://<DATABASE_NAME>.firebaseio.com"

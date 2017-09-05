@@ -1,5 +1,5 @@
 import {Updater} from "./Updater"
-import { DiscordWebhook } from "./DiscordWebhook"
+import { DiscordWebhook } from "./discordWebhook"
 import {Player, Server} from "hive-api";
 
 export enum ChangeType{

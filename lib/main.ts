@@ -27,11 +27,10 @@ new DiscordWebhook(config.discord.webhookId, config.discord.webhookKey);
 setMinTimeBetweenRequests(1000);
 console.log("Started!");
 
-
 GameTypes.update();
 
 console.log("Starting TeamUpdater");
-new TeamUpdater(db).start();
+//new TeamUpdater(db).start();
 
 console.log("Starting MapUpdater");
 new MapUpdater(db).start();

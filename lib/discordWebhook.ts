@@ -2,7 +2,9 @@ import * as request from "request"
 import { GameMap, Player } from "hive-api";
 import { ChangeType } from "./team";
 
-const hiveEmoji = `<:hive:354600124678406145>`
+const config = require("../config.json");
+// the a can be any letter but there must be at least 1 letter
+const hiveEmoji = `<:a:${config.discord.hiveEmojiId}>`
 
 export class DiscordWebhook {
   private static _instance;

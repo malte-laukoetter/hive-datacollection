@@ -1,5 +1,5 @@
 import { Updater } from "./Updater"
-import { DiscordWebhook } from "./DiscordWebhook"
+import { DiscordWebhook } from "./discordWebhook"
 import { Player, Server, GameTypes, GameMap } from "hive-api";
 
 export class MapUpdater extends Updater {
@@ -43,18 +43,20 @@ export class MapUpdater extends Updater {
   }
 
   async addToList(map: GameMap) {
-    this._dataRef.child(map.worldName).transaction(currentData => {
-      if(currentData === null){
-        DiscordWebhook.instance.sendNewMap(currentData);
+    this._dataRef.child(map.worldName).once('value' , snap => {
+      let currentData = snap.val();
 
-        return {
+      if(currentData === null){
+        DiscordWebhook.instance.sendNewMap(map);
+
+        return this._dataRef.child(map.worldName).set({
           date: new Date().getTime(),
           sortdate: 10000000000000 - new Date().getTime(),
           gameType: map.gameType.id,
           mapName: map.mapName || map.worldName,
           worldName: map.worldName,
           author: map.author || ""
-        }
+        })
       }else{
         if(
           map.mapName && currentData.mapName !== map.mapName
@@ -62,9 +64,8 @@ export class MapUpdater extends Updater {
         ){
           currentData.mapName = map.mapName || map.worldName;
           currentData.author = map.author || "";
-          return currentData;
-        }
-      }
+          return this._dataRef.child(map.worldName).update(currentData);
+        }      }
     }).catch((res) => {
       throw new Error(res);
     });
