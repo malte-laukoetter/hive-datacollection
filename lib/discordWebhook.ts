@@ -1,15 +1,17 @@
-import * as request from "request"
-import { GameMap, Player } from "hive-api";
+import { GameMap, Player, GameTypes } from "hive-api";
 import { ChangeType } from "./team";
+import { WebhookClient, RichEmbed } from "discord.js";
 
 const config = require("../config.json");
-// the a can be any letter but there must be at least 1 letter
-const hiveEmoji = `<:a:${config.discord.hiveEmojiId}>`
+const hiveEmoji = `<:hive:${config.discord.hiveEmojiId}>`
+
+const sendWorldNameGameTypes = [GameTypes.BED.id, GameTypes.SKY.id, GameTypes.GNT.id]
 
 export class DiscordWebhook {
   private static _instance;
   private _doSendTeamChange: boolean = true;
   private _doSendNewMaps: boolean = true;
+  private hook;
 
   set doSendTeamChange(send: boolean){
     this._doSendTeamChange = send;
@@ -31,27 +33,31 @@ export class DiscordWebhook {
     return DiscordWebhook._instance;
   }
 
-  constructor(readonly id: string, readonly key: string){
+  constructor(id: string, key: string){
     DiscordWebhook._instance = this;
+    this.hook = new WebhookClient(id, key);
   }
 
   send(message){
-    request.post({
-      url: `https://discordapp.com/api/webhooks/${this.id}/${this.key}`,
-      headers: {
-        "User-Agent": "hive-notification-bot (https://hive.lergin.de, v0.1)",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        content: message
-      })
-    });
+    this.hook.send(message);
   }
 
   sendNewMap(map: GameMap){
     if(!this.doSendNewMaps) return;
 
-    this.send(`${hiveEmoji} **New ${map.gameType.name} Map** ${hiveEmoji}\n${map.mapName} by ${map.author}\n\n*The map was just added to the API, there may be a delay before you can play it on the server*`);
+    const embed = new RichEmbed();
+    embed.setURL("https://hive.lergin.de/maps");
+    embed.setTitle(`${hiveEmoji} New ${map.gameType.name} Map ${hiveEmoji}`);
+    embed.addField("Game", map.gameType.name, true);
+    if (sendWorldNameGameTypes.indexOf(map.gameType.id) === -1){
+      embed.addField("Map", (map.mapName || map.worldName), true);
+    }else{
+      embed.addField("Map", `${map.mapName} (${map.worldName})`, true);
+    }
+    embed.addField("Created by", `*${map.author}*`, true);
+    embed.setFooter(`The map was just added to the API, there may be a delay before you can play it on the server`);
+
+    this.send(embed);
   }
 
   sendTeamChange(player: Player, type: ChangeType){

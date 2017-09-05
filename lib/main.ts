@@ -9,7 +9,7 @@ import {MedalUpdater} from "./medals";
 import {GamePlayersUpdater} from "./GamePlayersUpdater";
 import {PlayerStatsUpdater} from "./PlayerStatsUpdater";
 import {TotalKillsUpdater} from "./kills";
-import {DiscordWebhook} from "./DiscordWebhook"
+import {DiscordWebhook} from "./discordWebhook"
 
 const config = require("../config.json");
 const serviceAccount = require("../firebase_service_account.json");
