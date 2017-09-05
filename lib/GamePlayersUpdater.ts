@@ -1,0 +1,29 @@
+import {Updater} from "./Updater";
+import {GameType, GameTypes} from "hive-api";
+
+
+export class GamePlayersUpdater extends Updater{
+    private _interval: number;
+
+    constructor(db: admin.database.Database) {
+        super(db.ref("gamemodeStats"));
+
+        this._interval = 1000 * 60 * 60;
+    }
+
+    async start(): Promise<any> {
+        this.updateInfo();
+
+        setInterval(() => this.updateInfo(), this._interval);
+
+        return null;
+    }
+
+    async updateInfo(){
+        return Promise.all(GameTypes.list.map(async (gameType: GameType) => {
+            let players: number = await gameType.uniquePlayers(60*60*1000);
+
+            return this._ref.child(gameType.id).child(new Date().getTime().toString()).set(players);
+        }));
+    }
+}
