@@ -51,7 +51,7 @@ export class DiscordWebhook {
   sendNewMap(map: GameMap){
     if(!this.doSendNewMaps) return;
 
-    this.send(`${hiveEmoji} **New ${map.gameType.name} Map** ${hiveEmoji}\n${map.mapName} by ${map.author}`);
+    this.send(`${hiveEmoji} **New ${map.gameType.name} Map** ${hiveEmoji}\n${map.mapName} by ${map.author}\n\n*The map was just added to the API, there may be a delay before you can play it on the server*`);
   }
 
   sendTeamChange(player: Player, type: ChangeType){

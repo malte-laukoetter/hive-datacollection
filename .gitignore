@@ -4,3 +4,4 @@ firebase_service_account.json
 build
 *.log
 config.json
+config.prod.json

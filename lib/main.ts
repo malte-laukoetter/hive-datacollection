@@ -27,12 +27,9 @@ const discordWebhook = new DiscordWebhook(config.discord.webhookId, config.disco
 discordWebhook.doSendNewMaps = config.discord.sendNewMapMessage;
 discordWebhook.doSendTeamChange = config.discord.sendTeamChangeMessage;
 
-discordWebhook.sendTeamChange(new Player("Lergin_"), ChangeType.MODERATOR_ADD)
-discordWebhook.sendNewMap(new GameMap(GameTypes.BP, "NAME", "NAME", "AUTH"))
-
 setMinTimeBetweenRequests(1000);
 console.log("Started!");
-/*
+
 GameTypes.update();
 
 console.log("Starting TeamUpdater");
@@ -71,4 +68,4 @@ setTimeout(()=>{
 setTimeout(()=>{
     console.log("Starting PlayerStatsUpdater");
     new PlayerStatsUpdater(db).start();
-}, 165*60*1000);*/
+}, 165*60*1000);
