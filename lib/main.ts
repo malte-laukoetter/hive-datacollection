@@ -9,7 +9,7 @@ import {MedalUpdater} from "./medals";
 import {GamePlayersUpdater} from "./GamePlayersUpdater";
 import {PlayerStatsUpdater} from "./PlayerStatsUpdater";
 import {TotalKillsUpdater} from "./kills";
-import {DiscordWebhook} from "./discordWebhook"
+import { DiscordWebhook, NotificationSender, NotificationTwitterBot} from "./discordWebhook"
 
 const config = require("../config.json");
 const serviceAccount = require("../firebase_service_account.json");
@@ -22,50 +22,64 @@ admin.initializeApp({
 
 const db = admin.database();
 
-const discordWebhook = new DiscordWebhook(config.discord.webhookId, config.discord.webhookKey);
+config.discord.webhooks.forEach(hook => {
+    if(!hook.id || !hook.key) throw new Error("Each webhook needs an id and a key!")
 
-discordWebhook.doSendNewMaps = config.discord.sendNewMapMessage;
-discordWebhook.doSendTeamChange = config.discord.sendTeamChangeMessage;
+    const discordWebhook = new DiscordWebhook(hook.id, hook.key);
+    discordWebhook.hiveEmojiId = hook.hiveEmojiId;
+    discordWebhook.doSendNewMaps = hook.sendNewMapMessage;
+    discordWebhook.doSendTeamChange = hook.sendTeamChangeMessage;
+    NotificationSender.instance.register(discordWebhook)
+});
+
+config.twitter.forEach(config => {
+    NotificationSender.instance.register(new NotificationTwitterBot(config));
+})
 
 setMinTimeBetweenRequests(1000);
-console.log("Started!");
 
-GameTypes.update();
+async function main(){
+    console.log("Started!");
 
-console.log("Starting TeamUpdater");
-new TeamUpdater(db).start();
+    await GameTypes.update();
 
-console.log("Starting MapUpdater");
-new MapUpdater(db).start();
+    console.log("Starting TeamUpdater");
+    new TeamUpdater(db).start();
 
-setTimeout(() => {
-    console.log("Starting MedalUpdater");
-    new MedalUpdater(db).start();
-    console.log("Starting TokensUpdater");
-    new TokensUpdater(db).start();
-}, 40 * 1000);
+    console.log("Starting MapUpdater");
+    new MapUpdater(db).start();
 
-setTimeout(()=>{
-    console.log("Starting GamePlayersUpdater");
-    new GamePlayersUpdater(db).start();
-}, 5*60*1000);
+    setTimeout(() => {
+        console.log("Starting MedalUpdater");
+        new MedalUpdater(db).start();
+        console.log("Starting TokensUpdater");
+        new TokensUpdater(db).start();
+    }, 40 * 1000);
 
-setTimeout(()=>{
-    console.log("Starting TotalKillsUpdater");
-    new TotalKillsUpdater(db).start();
-}, 6*60*1000);
+    setTimeout(()=>{
+        console.log("Starting GamePlayersUpdater");
+        new GamePlayersUpdater(db).start();
+    }, 5*60*1000);
 
-setTimeout(()=>{
-    console.log("Starting TotalPointsUpdater");
-    new TotalPointsUpdater(db).start();
-}, 65*60*1000);
+    setTimeout(()=>{
+        console.log("Starting TotalKillsUpdater");
+        new TotalKillsUpdater(db).start();
+    }, 6*60*1000);
 
-setTimeout(()=>{
-    console.log("Starting AchievementUpdater");
-    new AchievementUpdater(db).start();
-}, 125*60*1000);
+    setTimeout(()=>{
+        console.log("Starting TotalPointsUpdater");
+        new TotalPointsUpdater(db).start();
+    }, 65*60*1000);
 
-setTimeout(()=>{
-    console.log("Starting PlayerStatsUpdater");
-    new PlayerStatsUpdater(db).start();
-}, 165*60*1000);
+    setTimeout(()=>{
+        console.log("Starting AchievementUpdater");
+        new AchievementUpdater(db).start();
+    }, 125*60*1000);
+
+    setTimeout(()=>{
+        console.log("Starting PlayerStatsUpdater");
+        new PlayerStatsUpdater(db).start();
+    }, 165*60*1000);
+}
+
+main().catch(console.error);

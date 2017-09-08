@@ -1,5 +1,5 @@
 import {Updater} from "./Updater"
-import { DiscordWebhook } from "./discordWebhook"
+import { NotificationSender } from "./discordWebhook"
 import {Player, Server} from "hive-api";
 
 export enum ChangeType{
@@ -107,6 +107,6 @@ export class TeamUpdater extends Updater {
             type: type
         });
 
-        DiscordWebhook.instance.sendTeamChange(player, type);
+        NotificationSender.instance.sendTeamChange(player, type);
     }
 }

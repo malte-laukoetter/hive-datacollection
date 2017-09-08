@@ -1,11 +1,23 @@
 {
   "discord": {
-    "webhookKey": "",
-    "webhookId": "",
-    "hiveEmojiId": "292737966651211776",
-    "sendNewMapMessage": true,
-    "sendTeamChangeMessage": true
+    "webhooks": [
+      {
+        "key": "",
+        "id": "",
+        "hiveEmojiId": "",
+        "sendNewMapMessage": true,
+        "sendTeamChangeMessage": true
+      }
+    ]
   },
+  "twitter": [
+    {
+      "consumer_secret": "",
+      "consumer_key": "",
+      "access_token": "",
+      "access_token_secret": ""
+    }
+  ],
   "firebase": {
     "databaseURL": "https://<DATABASE_NAME>.firebaseio.com"
   }

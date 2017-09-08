@@ -1,5 +1,5 @@
 import { Updater } from "./Updater"
-import { DiscordWebhook } from "./discordWebhook"
+import { NotificationSender } from "./discordWebhook"
 import { Player, Server, GameTypes, GameMap } from "hive-api";
 
 export class MapUpdater extends Updater {
@@ -47,7 +47,7 @@ export class MapUpdater extends Updater {
       let currentData = snap.val();
 
       if(currentData === null){
-        DiscordWebhook.instance.sendNewMap(map);
+        NotificationSender.instance.sendNewMap(map);
 
         return this._dataRef.child(map.worldName).set({
           date: new Date().getTime(),
