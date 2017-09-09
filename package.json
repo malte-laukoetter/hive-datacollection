@@ -1,19 +1,23 @@
 {
-  "name": "hive-medal-leaderboard",
+  "name": "hive-data-collector",
   "version": "1.0.0",
-  "description": "A leaderboard for hive medals",
+  "description": "Backendscript for https://hive.lergin.de",
   "main": "build/main.js",
   "scripts": {
     "start": "tsc && node build/main.js"
   },
-  "author": "",
+  "author": "Malte Laukötter",
   "license": "MIT",
   "dependencies": {
     "discord.js": "^11.2.1",
     "firebase-admin": "^5.0.1",
-    "hive-api": "^1.1.2",
+    "hive-api": "^1.2.3",
     "node-twitterbot": "^0.2.2",
     "request": "^2.81.0",
+    "tslib": "^1.7.1",
     "typescript": "^2.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^8.0.28"
   }
 }

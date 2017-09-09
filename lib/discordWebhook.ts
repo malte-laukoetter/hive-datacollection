@@ -146,7 +146,6 @@ export class NotificationTwitterBot implements NotificationSubscriber {
   }
   
   send(message){
-    console.log(message);
     this._bot.tweet(message);
   }
 
@@ -161,36 +160,45 @@ export class NotificationTwitterBot implements NotificationSubscriber {
     this.send(message);
   }
 
-  sendTeamChange(player: Player, type: ChangeType){
-    let message = ""
+  async sendTeamChange(player: Player, type: ChangeType){
+    let message = "";
+    let twitterHandle = await player.getTwitter();
+
+    if(twitterHandle === player.name){
+      message = `@${player.name} `;
+    }else if(twitterHandle){
+      message = `${player.name} (@${twitterHandle}) `;      
+    }else{
+      message = `${player.name} `;
+    }
 
     switch (type) {
       case ChangeType.MODERATOR_ADD:
-        message = `${player.name} is now a Moderator on @theHiveMC!`;
+        message += `is now a Moderator on @theHiveMC!`;
         break;
       case ChangeType.MODERATOR_REMOVE:
-        message = `${player.name} is no longer a Moderator on @theHiveMC ☹️`;
+        message += `is no longer a Moderator on @theHiveMC ☹️`;
         break;
       case ChangeType.SENIOR_MODERATOR_ADD:
-        message = `${player.name} is now a Senior Moderator on @theHiveMC!`;
+        message += `is now a Senior Moderator on @theHiveMC!`;
         break;
       case ChangeType.SENIOR_MODERATOR_REMOVE:
-        message = `${player.name} is no longer a Senior Moderator on @theHiveMC 😢`;
+        message += `is no longer a Senior Moderator on @theHiveMC 😢`;
         break;
       case ChangeType.DEVELOPER_ADD:
-        message = `${player.name} is now a Developer on @theHiveMC!`;
+        message += `is now a Developer on @theHiveMC!`;
         break;
       case ChangeType.DEVELOPER_REMOVE:
-        message = `${player.name} is no longer a Developer on @theHiveMC 😭`;
+        message += `is no longer a Developer on @theHiveMC 😭`;
         break;
       case ChangeType.OWNER_ADD:
-        message = `${player.name} is now an Owner on @theHiveMC!`;
+        message += `is now an Owner on @theHiveMC!`;
         break;
       case ChangeType.OWNER_REMOVE:
-        message = `${player.name} is no longer an Owner on @theHiveMC 😱`;
+        message += `is no longer an Owner on @theHiveMC 😱`;
         break;
       default:
-        message = `${player.name} is now something else on @theHiveMC but we don't know what...`;
+        message += `is now something else on @theHiveMC but we don't know what...`;
         break;
     }
 

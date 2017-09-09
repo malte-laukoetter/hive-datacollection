@@ -21,7 +21,7 @@ export class PlayerStatsUpdater extends Updater {
         this.currentWeeklyRef = this._ref.child("weekly").child((new Date()).getDay().toString());
 
         // weekly ref of next day (current day + 1 mod 7)
-        this.prevWeeklyRef = this._ref.child("weekly").child((((new Date()).getDay() - 1) % 7).toString());
+        this.prevWeeklyRef = this._ref.child("weekly").child((((new Date()).getDay()) % 7).toString());
 
         // not monthly but all 30 days
         this.currentMonthlyRef = this._ref.child("monthly").child((PlayerStatsUpdater.dayOfYear(new Date()) % 30).toString());
