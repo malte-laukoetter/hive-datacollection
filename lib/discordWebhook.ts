@@ -78,12 +78,20 @@ export class DiscordWebhook extends WebhookClient implements NotificationSubscri
     embed.setURL("https://hive.lergin.de/maps");
     embed.setTitle(`${this.hiveEmoji} New ${map.gameType.name} Map ${this.hiveEmoji}`);
     embed.addField("Game", map.gameType.name, true);
+
     if (sendWorldNameGameTypes.indexOf(map.gameType.id) === -1){
       embed.addField("Map", (map.mapName || map.worldName), true);
     }else{
-      embed.addField("Map", `${map.mapName} (${map.worldName})`, true);
+      if(map.mapName){
+        embed.addField("Map", `${map.mapName} (${map.worldName})`, true);
+      }else{
+        embed.addField("Map", map.worldName, true);
+      }
     }
-    embed.addField("Created by", `*${map.author}*`, true);
+
+    if(map.author){
+      embed.addField("Created by", `*${map.author}*`, true);
+    }
     embed.setFooter(`The map was just added to the API, there may be a delay before you can play it on the server`);
 
     this.send(embed);
@@ -150,7 +158,12 @@ export class NotificationTwitterBot implements NotificationSubscriber {
   }
 
   sendNewMap(map: GameMap){
-    let message = `There is a new ${map.gameType.name} map on @theHiveMC!\n\n${map.mapName} by ${map.author}`;
+    let message = `There is a new ${map.gameType.name} map on @theHiveMC!\n\n${map.mapName || map.worldName}`
+    
+    if(map.author) {
+      message += `by ${map.author}`;
+    }
+
     let adv = `\n\nhttps://hive.lergin.de/maps`
 
     if (message.length + adv.length <= 140) {
