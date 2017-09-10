@@ -92,7 +92,7 @@ export class DiscordWebhook extends WebhookClient implements NotificationSubscri
     if(map.author){
       embed.addField("Created by", `*${map.author}*`, true);
     }
-    embed.setFooter(`The map was just added to the API, there may be a delay before you can play it on the server`);
+    embed.setFooter(`The map was just added to the API, it may take some weeks before you can play it on the server`);
 
     this.send(embed);
   }
@@ -164,7 +164,13 @@ export class NotificationTwitterBot implements NotificationSubscriber {
       message += `by ${map.author}`;
     }
 
-    let adv = `\n\nhttps://hive.lergin.de/maps`
+    let note =`\n\nIt may not be playable jet...`
+
+    if (message.length + note.length <= 140) {
+      message += note;
+    }
+
+    let adv = `\nhttps://hive.lergin.de/maps`
 
     if (message.length + adv.length <= 140) {
       message += adv;
