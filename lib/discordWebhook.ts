@@ -174,31 +174,31 @@ export class NotificationTwitterBot implements NotificationSubscriber {
 
     switch (type) {
       case ChangeType.MODERATOR_ADD:
-        message += `is now a Moderator on @theHiveMC!`;
+        message += `is now a Moderator on @theHiveMC 🙂`;
         break;
       case ChangeType.MODERATOR_REMOVE:
         message += `is no longer a Moderator on @theHiveMC ☹️`;
         break;
       case ChangeType.SENIOR_MODERATOR_ADD:
-        message += `is now a Senior Moderator on @theHiveMC!`;
+        message += `is now a Senior Moderator on @theHiveMC 😃`;
         break;
       case ChangeType.SENIOR_MODERATOR_REMOVE:
         message += `is no longer a Senior Moderator on @theHiveMC 😢`;
         break;
       case ChangeType.DEVELOPER_ADD:
-        message += `is now a Developer on @theHiveMC!`;
+        message = `🎉 ${message} is now a Developer on @theHiveMC 🎉`;
         break;
       case ChangeType.DEVELOPER_REMOVE:
         message += `is no longer a Developer on @theHiveMC 😭`;
         break;
       case ChangeType.OWNER_ADD:
-        message += `is now an Owner on @theHiveMC!`;
+        message = `🎉🎉🎉 ${message} is now an Owner on @theHiveMC 🎉🎉🎉`;
         break;
       case ChangeType.OWNER_REMOVE:
         message += `is no longer an Owner on @theHiveMC 😱`;
         break;
       default:
-        message += `is now something else on @theHiveMC but we don't know what...`;
+        message += `is now something else on @theHiveMC but we don't know what 🤔`;
         break;
     }
 
