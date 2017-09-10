@@ -44,7 +44,7 @@ export class DiscordWebhook extends WebhookClient implements NotificationSubscri
   hiveEmojiId: String = ''
 
   private get hiveEmoji(): String{
-    return `<:hive:${this.hiveEmojiId}>`;
+    return this.hiveEmoji.length > 2 ? `<:hive:${this.hiveEmojiId}>` : '';
   }
 
   set doSendTeamChange(send: boolean){
