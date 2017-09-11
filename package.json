@@ -12,6 +12,7 @@
     "discord.js": "^11.2.1",
     "firebase-admin": "^5.0.1",
     "hive-api": "^1.2.3",
+    "node-fetch": "^1.7.3",
     "node-twitterbot": "^0.2.2",
     "request": "^2.81.0",
     "tslib": "^1.7.1",

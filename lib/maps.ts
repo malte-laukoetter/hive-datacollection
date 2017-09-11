@@ -65,7 +65,8 @@ export class MapUpdater extends Updater {
           currentData.mapName = map.mapName || map.worldName;
           currentData.author = map.author || "";
           return this._dataRef.child(map.worldName).update(currentData);
-        }      }
+        }      
+      }
     }).catch((res) => {
       throw new Error(res);
     });

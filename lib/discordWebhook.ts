@@ -2,6 +2,7 @@ import { GameMap, Player, GameTypes } from "hive-api";
 import { ChangeType } from "./team";
 import { WebhookClient, RichEmbed } from "discord.js";
 import { TwitterBot } from "node-twitterbot";
+import * as fetch from 'node-fetch';
 
 const sendWorldNameGameTypes = [GameTypes.BED.id, GameTypes.SKY.id, GameTypes.GNT.id]
 
@@ -44,7 +45,7 @@ export class DiscordWebhook extends WebhookClient implements NotificationSubscri
   hiveEmojiId: String = ''
 
   private get hiveEmoji(): String{
-    return this.hiveEmoji.length > 2 ? `<:hive:${this.hiveEmojiId}>` : '';
+    return this.hiveEmojiId.length > 2 ? `<:hive:${this.hiveEmojiId}>` : '';
   }
 
   set doSendTeamChange(send: boolean){
@@ -142,7 +143,12 @@ export class DiscordWebhook extends WebhookClient implements NotificationSubscri
         break;
     }
 
-    this.send(`${this.hiveEmoji} **${title}** ${this.hiveEmoji}\n${body}`);
+    const embed = new RichEmbed();
+    embed.setURL("https://hive.lergin.de/team");
+    embed.setTitle(`${this.hiveEmoji} ${title} ${this.hiveEmoji}`);
+    embed.setDescription(body);
+
+    this.send(embed);
   }
 }
 
@@ -161,10 +167,10 @@ export class NotificationTwitterBot implements NotificationSubscriber {
     let message = `There is a new ${map.gameType.name} map on @theHiveMC!\n\n${map.mapName || map.worldName}`
     
     if(map.author) {
-      message += `by ${map.author}`;
+      message += ` by ${map.author}`;
     }
 
-    let note =`\n\nIt may not be playable jet...`
+    let note =`\n\nIt may not be playable yet...`
 
     if (message.length + note.length <= 140) {
       message += note;
@@ -182,6 +188,10 @@ export class NotificationTwitterBot implements NotificationSubscriber {
   async sendTeamChange(player: Player, type: ChangeType){
     let message = "";
     let twitterHandle = await player.getTwitter();
+
+    if(!twitterHandle){
+      twitterHandle = await getNameMcTwitter(player.uuid || player.name);
+    }
 
     if(twitterHandle === player.name){
       message = `@${player.name} `;
@@ -229,4 +239,14 @@ export class NotificationTwitterBot implements NotificationSubscriber {
 
     this.send(message);
   }
+}
+
+
+const namemcUrl = `https://namemc.com/profile/`;
+
+function getNameMcTwitter(uuid){
+  return fetch(namemcUrl + uuid)
+    .then(res => res.text())
+    .then(res => res.match(/(?:href=\"https:\/\/twitter\.com\/)((\w){1,15})(?=\" target)/))
+    .then(res => res ? res[1] ? res[1] : null : null)
 }
