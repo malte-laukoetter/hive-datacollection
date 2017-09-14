@@ -9,7 +9,8 @@ import {MedalUpdater} from "./medals";
 import {GamePlayersUpdater} from "./GamePlayersUpdater";
 import {PlayerStatsUpdater} from "./PlayerStatsUpdater";
 import {TotalKillsUpdater} from "./kills";
-import { DiscordWebhook, NotificationSender, NotificationTwitterBot} from "./discordWebhook"
+import { DiscordWebhook, NotificationSender } from "./discordWebhook";
+import { NotificationTwitterBot } from "./twitterBot";
 
 const config = require("../config.json");
 const serviceAccount = require("../firebase_service_account.json");
@@ -29,6 +30,7 @@ config.discord.webhooks.forEach(hook => {
     discordWebhook.hiveEmojiId = hook.hiveEmojiId;
     discordWebhook.doSendNewMaps = hook.sendNewMapMessage;
     discordWebhook.doSendTeamChange = hook.sendTeamChangeMessage;
+    discordWebhook.mapGameTypes = hook.mapGameTypes;
     NotificationSender.instance.register(discordWebhook)
 });
 

@@ -1,8 +1,6 @@
-import { GameMap, Player, GameTypes } from "hive-api";
+import { GameMap, Player, GameTypes, GameType } from "hive-api";
 import { ChangeType } from "./team";
 import { WebhookClient, RichEmbed } from "discord.js";
-import { TwitterBot } from "node-twitterbot";
-import * as fetch from 'node-fetch';
 
 const sendWorldNameGameTypes = [GameTypes.BED.id, GameTypes.SKY.id, GameTypes.GNT.id]
 
@@ -42,10 +40,19 @@ export interface NotificationSubscriber {
 export class DiscordWebhook extends WebhookClient implements NotificationSubscriber {
   private _doSendTeamChange: boolean = true;
   private _doSendNewMaps: boolean = true;
+  private _mapGameTypes: String[] = [];
   hiveEmojiId: String = ''
 
   private get hiveEmoji(): String{
     return this.hiveEmojiId.length > 2 ? `<:hive:${this.hiveEmojiId}>` : '';
+  }
+
+  set mapGameTypes(gameTypes: String[]) {
+    this._mapGameTypes = gameTypes || [];
+  }
+
+  mapGameTypeActive(gameType: GameType){
+    return this._mapGameTypes.length === 0 || this._mapGameTypes.indexOf(gameType.id) !== -1;
   }
 
   set doSendTeamChange(send: boolean){
@@ -74,6 +81,8 @@ export class DiscordWebhook extends WebhookClient implements NotificationSubscri
 
   sendNewMap(map: GameMap){
     if(!this.doSendNewMaps) return;
+
+    if(!this.mapGameTypeActive(map.gameType)) return;
 
     const embed = new RichEmbed();
     embed.setURL("https://hive.lergin.de/maps");
@@ -150,103 +159,4 @@ export class DiscordWebhook extends WebhookClient implements NotificationSubscri
 
     this.send(embed);
   }
-}
-
-export class NotificationTwitterBot implements NotificationSubscriber {
-  private _bot: TwitterBot;
-
-  constructor(twitterBotSettings){
-    this._bot = new TwitterBot(twitterBotSettings);
-  }
-  
-  send(message){
-    this._bot.tweet(message);
-  }
-
-  sendNewMap(map: GameMap){
-    let message = `There is a new ${map.gameType.name} map on @theHiveMC!\n\n${map.mapName || map.worldName}`
-    
-    if(map.author) {
-      message += ` by ${map.author}`;
-    }
-
-    let note =`\n\nIt may not be playable yet...`
-
-    if (message.length + note.length <= 140) {
-      message += note;
-    }
-
-    let adv = `\nhttps://hive.lergin.de/maps`
-
-    if (message.length + adv.length <= 140) {
-      message += adv;
-    }
-
-    this.send(message);
-  }
-
-  async sendTeamChange(player: Player, type: ChangeType){
-    let message = "";
-    let twitterHandle = await player.getTwitter();
-
-    if(!twitterHandle){
-      twitterHandle = await getNameMcTwitter(player.uuid || player.name);
-    }
-
-    if(twitterHandle === player.name){
-      message = `@${player.name} `;
-    }else if(twitterHandle){
-      message = `${player.name} (@${twitterHandle}) `;      
-    }else{
-      message = `${player.name} `;
-    }
-
-    switch (type) {
-      case ChangeType.MODERATOR_ADD:
-        message += `is now a Moderator on @theHiveMC 🙂`;
-        break;
-      case ChangeType.MODERATOR_REMOVE:
-        message += `is no longer a Moderator on @theHiveMC ☹️`;
-        break;
-      case ChangeType.SENIOR_MODERATOR_ADD:
-        message += `is now a Senior Moderator on @theHiveMC 😃`;
-        break;
-      case ChangeType.SENIOR_MODERATOR_REMOVE:
-        message += `is no longer a Senior Moderator on @theHiveMC 😢`;
-        break;
-      case ChangeType.DEVELOPER_ADD:
-        message = `🎉 ${message} is now a Developer on @theHiveMC 🎉`;
-        break;
-      case ChangeType.DEVELOPER_REMOVE:
-        message += `is no longer a Developer on @theHiveMC 😭`;
-        break;
-      case ChangeType.OWNER_ADD:
-        message = `🎉🎉🎉 ${message} is now an Owner on @theHiveMC 🎉🎉🎉`;
-        break;
-      case ChangeType.OWNER_REMOVE:
-        message += `is no longer an Owner on @theHiveMC 😱`;
-        break;
-      default:
-        message += `is now something else on @theHiveMC but we don't know what 🤔`;
-        break;
-    }
-
-    let adv = `\n\nhttps://hive.lergin.de/team`
-
-    if(message.length + adv.length <= 140){
-      message += adv;
-    }
-
-    this.send(message);
-  }
-}
-
-
-const namemcUrl = `https://namemc.com/profile/`;
-
-function getNameMcTwitter(uuid){
-  return fetch(namemcUrl + uuid)
-    .then(res => res.text())
-    .then(res => res.match(/(?:href=\"https:\/\/twitter\.com\/)((\w){1,15})(?=\" target)/))
-    .then(res => res ? res[1] ? res[1] : null : null)
 }
