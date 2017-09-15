@@ -140,10 +140,9 @@ function getNamesFromMapAuthor(str): string[] {
     "and"
   ]
 
+  return str
   // split at a space, comma or between names
-  let strx = str.split(/([^a-zA-Z0-9_]( |,|and)|( |,|and)[^a-zA-Z0-9_])/g)
-  
-  strx = strx
+  .split(/([^a-zA-Z0-9_]( |and)|( |and)[^a-zA-Z0-9_]|,)/g)
   // remove stuff like undefined
   .filter(s => s)
   // remove everything that has special charactars inside the word (eg. Team Nectar or youtube links)
@@ -154,8 +153,6 @@ function getNamesFromMapAuthor(str): string[] {
   .filter(s => s.match(/[a-zA-Z0-9_]{1,16}/) !== null)
   // remove blacklisted names
   .filter(s => blacklist.indexOf(s) === -1);
-  
-  return strx;
 }
 
 /*
@@ -183,6 +180,7 @@ testCases.set("http://youtube.com/SomethingMLG - TwinkleMan, Flomarrisnix1123, d
 testCases.set("Team Nectar (Goldfan, Sphere + Nistune)", ["Goldfan", "Sphere", "Nistune"]);
 testCases.set("Team Nectar (Supermassimo, goldfangl14)", ["Supermassimo", "goldfangl14"]);
 testCases.set("PalmSprings, Tibbz123, LakeOntario, Moneyyy", ["PalmSprings", "Tibbz123", "LakeOntario", "Moneyyy"]);
+testCases.set("PalmSprings,Tibbz123,LakeOntario,Moneyyy", ["PalmSprings", "Tibbz123", "LakeOntario", "Moneyyy"]);
 
 console.log("Starting the tests");
 [...testCases.entries()].forEach(([str, res]) => {

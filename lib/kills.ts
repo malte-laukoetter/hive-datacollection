@@ -40,15 +40,11 @@ export class TotalKillsUpdater extends LeaderboardUpdater{
 
             });
 
-            //console.log(kills);
-
             this._gamedataRef.child(player.uuid).child("name").set(info.name);
             this._dataRef.child(player.uuid).update({
                 kills: kills.reduce((a,b)=> a+b),
                 name: info.name
             });
-
-            //console.log(player.uuid);
         })
     }
 }

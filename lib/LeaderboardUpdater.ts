@@ -50,13 +50,17 @@ export abstract class LeaderboardUpdater extends Updater{
                         this._waitingPlayers.add(a.value);
                         return;
                     }, this._intervalUpdate);
-                }).catch(err => {
+                }).catch((err: Error) => {
                     setTimeout(()=>{
                         this._waitingPlayers.add(a.value);
                         return;
                     }, this._intervalUpdate);
 
-                    console.error(`error while updating ${a.value.uuid}: ${err.message}`)
+                    if (err.name === "FetchError"){
+                        console.error(`Error Response from Hive: ${a.value.uuid}`)
+                    }else {
+                        console.error(`error while updating ${a.value.uuid}: ${err.message}`)
+                    }
                 });
             }
         }, this._intervalAll);

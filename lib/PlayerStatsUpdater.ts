@@ -105,7 +105,11 @@ export class PlayerStatsUpdater extends Updater {
             }
 
         }catch(err) {
-            console.error(err);
+            if (err.name === "FetchError") {
+                console.error(`Error Response from Hive: ${player.uuid}`)
+            } else {
+                console.error(`error while updating ${player.uuid}: ${err.message}`)
+            }
 
             return false;
         }
