@@ -36,65 +36,69 @@ export class TeamUpdater extends Updater {
     }
 
     async updateInfo(){
-        let owners = await Server.owners(1000*60*10);
-        let developers = await Server.developers(1000*60*10);
-        let seniorModerators = await Server.seniorModerators(1000*60*10);
-        let moderators = await Server.moderators(1000*60*10);
+        try {
+            let owners = await Server.owners(1000*60*10);
+            let developers = await Server.developers(1000*60*10);
+            let seniorModerators = await Server.seniorModerators(1000*60*10);
+            let moderators = await Server.moderators(1000*60*10);
 
-        this._oldDataRef.once("value", snap => {
-            let data = snap.val();
+            this._oldDataRef.once("value", snap => {
+                let data = snap.val();
 
-            if(!data) return;
+                if(!data) return;
 
-            let oldOwners: string[] = data.owners;
-            let oldDevelopers: string[] = data.developers;
-            let oldSeniorModerators: string[] = data.seniorModerators;
-            let oldModerators: string[] = data.moderators;
+                let oldOwners: string[] = data.owners;
+                let oldDevelopers: string[] = data.developers;
+                let oldSeniorModerators: string[] = data.seniorModerators;
+                let oldModerators: string[] = data.moderators;
 
-            owners.filter(player => oldOwners.indexOf(player.uuid) === -1)
-                .forEach(async player => this.addToChangeList(player, ChangeType.OWNER_ADD));
+                owners.filter(player => oldOwners.indexOf(player.uuid) === -1)
+                    .forEach(async player => this.addToChangeList(player, ChangeType.OWNER_ADD));
 
-            developers.filter(player => oldDevelopers.indexOf(player.uuid) === -1)
-                .forEach(async player => this.addToChangeList(player, ChangeType.DEVELOPER_ADD));
+                developers.filter(player => oldDevelopers.indexOf(player.uuid) === -1)
+                    .forEach(async player => this.addToChangeList(player, ChangeType.DEVELOPER_ADD));
 
-            seniorModerators.filter(player => oldSeniorModerators.indexOf(player.uuid) === -1)
-                .forEach(async player => this.addToChangeList(player, ChangeType.SENIOR_MODERATOR_ADD));
+                seniorModerators.filter(player => oldSeniorModerators.indexOf(player.uuid) === -1)
+                    .forEach(async player => this.addToChangeList(player, ChangeType.SENIOR_MODERATOR_ADD));
 
-            moderators.filter(player => oldModerators.indexOf(player.uuid) === -1)
-                .forEach(async player => this.addToChangeList(player, ChangeType.MODERATOR_ADD));
+                moderators.filter(player => oldModerators.indexOf(player.uuid) === -1)
+                    .forEach(async player => this.addToChangeList(player, ChangeType.MODERATOR_ADD));
 
-            let ownersUuids = owners.map(player => player.uuid);
-            oldOwners.filter(uuid => ownersUuids.indexOf(uuid) === -1)
-                .forEach(async uuid => this.addToChangeList(new Player(uuid), ChangeType.OWNER_REMOVE));
+                let ownersUuids = owners.map(player => player.uuid);
+                oldOwners.filter(uuid => ownersUuids.indexOf(uuid) === -1)
+                    .forEach(async uuid => this.addToChangeList(new Player(uuid), ChangeType.OWNER_REMOVE));
 
-            let developersUuids = developers.map(player => player.uuid);
-            oldDevelopers.filter(uuid =>
-                developersUuids.indexOf(uuid) === -1 &&
-                ownersUuids.indexOf(uuid) === -1
-            ).forEach(async uuid => this.addToChangeList(new Player(uuid), ChangeType.DEVELOPER_REMOVE));
+                let developersUuids = developers.map(player => player.uuid);
+                oldDevelopers.filter(uuid =>
+                    developersUuids.indexOf(uuid) === -1 &&
+                    ownersUuids.indexOf(uuid) === -1
+                ).forEach(async uuid => this.addToChangeList(new Player(uuid), ChangeType.DEVELOPER_REMOVE));
 
-            let seniorModeratorsUuids = seniorModerators.map(player => player.uuid);
-            oldSeniorModerators.filter(uuid =>
-                seniorModeratorsUuids.indexOf(uuid) === -1 &&
-                developersUuids.indexOf(uuid) === -1 &&
-                ownersUuids.indexOf(uuid) === -1
-            ).forEach(async uuid => this.addToChangeList(new Player(uuid), ChangeType.SENIOR_MODERATOR_REMOVE));
+                let seniorModeratorsUuids = seniorModerators.map(player => player.uuid);
+                oldSeniorModerators.filter(uuid =>
+                    seniorModeratorsUuids.indexOf(uuid) === -1 &&
+                    developersUuids.indexOf(uuid) === -1 &&
+                    ownersUuids.indexOf(uuid) === -1
+                ).forEach(async uuid => this.addToChangeList(new Player(uuid), ChangeType.SENIOR_MODERATOR_REMOVE));
 
-            let moderatorsUuids = moderators.map(player => player.uuid);
-            oldModerators.filter(uuid =>
-                moderatorsUuids.indexOf(uuid) === -1 &&
-                seniorModeratorsUuids.indexOf(uuid) === -1 &&
-                developersUuids.indexOf(uuid) === -1 &&
-                ownersUuids.indexOf(uuid) === -1
-            ).forEach(async uuid => this.addToChangeList(new Player(uuid), ChangeType.MODERATOR_REMOVE));
+                let moderatorsUuids = moderators.map(player => player.uuid);
+                oldModerators.filter(uuid =>
+                    moderatorsUuids.indexOf(uuid) === -1 &&
+                    seniorModeratorsUuids.indexOf(uuid) === -1 &&
+                    developersUuids.indexOf(uuid) === -1 &&
+                    ownersUuids.indexOf(uuid) === -1
+                ).forEach(async uuid => this.addToChangeList(new Player(uuid), ChangeType.MODERATOR_REMOVE));
 
-            this._oldDataRef.set({
-                "owners": owners.map(player => player.uuid),
-                "developers": developers.map(player => player.uuid),
-                "seniorModerators": seniorModerators.map(player => player.uuid),
-                "moderators": moderators.map(player => player.uuid)
+                this._oldDataRef.set({
+                    "owners": owners.map(player => player.uuid),
+                    "developers": developers.map(player => player.uuid),
+                    "seniorModerators": seniorModerators.map(player => player.uuid),
+                    "moderators": moderators.map(player => player.uuid)
+                })
             })
-        })
+        }catch(err){
+            Updater.sendError(err, 'team');
+        }
     }
 
     async addToChangeList(player: Player, type: ChangeType){

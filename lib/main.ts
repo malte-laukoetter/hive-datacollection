@@ -38,7 +38,7 @@ config.twitter.forEach(config => {
     NotificationSender.instance.register(new NotificationTwitterBot(config));
 })
 
-setMinTimeBetweenRequests(1000);
+setMinTimeBetweenRequests(1400);
 
 async function main(){
     console.log("Started!");

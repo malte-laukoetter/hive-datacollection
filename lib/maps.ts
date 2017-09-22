@@ -27,18 +27,26 @@ export class MapUpdater extends Updater {
 
   async initUpdateInfo() {
     await GameTypes.list.forEach(async type => {
-      let maps = await type.maps();
+      try{
+        let maps = await type.maps();
 
-      await Promise.all(maps.map(async map => this.addToList(map)));
+        await Promise.all(maps.map(async map => this.addToList(map)));
+      }catch(err) {
+        Updater.sendError(err, `${type.id}/maps`);
+      }
     });
   }
 
   async updateInfo() {
     GameTypes.list.forEach(async type => {
-      let maps = await type.maps(this._interval);
+      try {
+        let maps = await type.maps(this._interval);
 
-      maps.filter(map => !this.oldData.has(type.id) || this.oldData.get(type.id).indexOf(map.worldName) === -1)
-        .forEach(async map => this.addToList(map).catch(err => console.error(err + map.worldName)));
+        maps.filter(map => !this.oldData.has(type.id) || this.oldData.get(type.id).indexOf(map.worldName) === -1)
+          .forEach(async map => this.addToList(map).catch(err => console.error(err + map.worldName)));
+      }catch(err){
+        Updater.sendError(err, `${type.id}/maps`);
+      }
     });
   }
 

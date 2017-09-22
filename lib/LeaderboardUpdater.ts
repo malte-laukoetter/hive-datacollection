@@ -56,11 +56,7 @@ export abstract class LeaderboardUpdater extends Updater{
                         return;
                     }, this._intervalUpdate);
 
-                    if (err.name === "FetchError"){
-                        console.error(`Error Response from Hive: ${a.value.uuid}`)
-                    }else {
-                        console.error(`error while updating ${a.value.uuid}: ${err.message}`)
-                    }
+                    Updater.sendError(err, a.value.uuid);
                 });
             }
         }, this._intervalAll);
