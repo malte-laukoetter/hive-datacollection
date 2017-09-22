@@ -16,9 +16,15 @@ export class NotificationTwitterBot implements NotificationSubscriber {
   }
 
   async sendNewMap(map: GameMap) {
-    let message = `There is a new ${map.gameType.name} map on @theHiveMC!\n\n${map.mapName || map.worldName}`
+    let message = `There is a new ${map.gameType.name} map on @theHiveMC!\n\n`
+    
+    if(map.mapName && map.mapName !== "UnknownMap"){
+      message += map.mapName
+    }else{
+      message += map.worldName
+    }
 
-    if (map.author) {
+    if (map.author && map.author !== "UnknownAuthor") {
       // load the twitter handles of the creators
       let twitterHandles: Map<string, string> = new Map();
 
