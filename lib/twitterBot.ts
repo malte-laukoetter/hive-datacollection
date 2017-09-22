@@ -1,8 +1,10 @@
 import { TwitterBot } from "node-twitterbot";
 import * as fetch from 'node-fetch';
-import { GameMap, Player } from 'hive-api';
+import { GameMap, Player, GameTypes } from 'hive-api';
 import { NotificationSubscriber} from './discordWebhook';
 import { ChangeType } from "./team";
+
+const sendWorldNameGameTypes = [GameTypes.BED.id, GameTypes.SKY.id, GameTypes.GNT.id];
 
 export class NotificationTwitterBot implements NotificationSubscriber {
   private _bot: TwitterBot;
@@ -16,12 +18,18 @@ export class NotificationTwitterBot implements NotificationSubscriber {
   }
 
   async sendNewMap(map: GameMap) {
+    
+    
     let message = `There is a new ${map.gameType.name} map on @theHiveMC!\n\n`
     
     if(map.mapName && map.mapName !== "UnknownMap"){
-      message += map.mapName
+      if (sendWorldNameGameTypes.indexOf(map.gameType.id) === -1) {
+        message += map.mapName;
+      }else{
+        message += `${map.mapName} (${map.worldName})`;
+      }
     }else{
-      message += map.worldName
+      message += map.worldName;
     }
 
     if (map.author && map.author !== "UnknownAuthor") {
