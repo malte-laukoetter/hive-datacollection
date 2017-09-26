@@ -11,10 +11,10 @@ import {PlayerStatsUpdater} from "./PlayerStatsUpdater";
 import {TotalKillsUpdater} from "./kills";
 import { DiscordWebhook, NotificationSender } from "./discordWebhook";
 import { NotificationTwitterBot } from "./twitterBot";
+import { TwitterHandleProvider } from "./TwitterHandleProvider";
 
 const config = require("../config.json");
 const serviceAccount = require("../firebase_service_account.json");
-
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -22,6 +22,8 @@ admin.initializeApp({
 });
 
 const db = admin.database();
+
+new TwitterHandleProvider(db.ref("twitterHandles"));
 
 config.discord.webhooks.forEach(hook => {
     if(!hook.id || !hook.key) throw new Error("Each webhook needs an id and a key!")
@@ -36,11 +38,11 @@ config.discord.webhooks.forEach(hook => {
 
 config.twitter.forEach(config => {
     NotificationSender.instance.register(new NotificationTwitterBot(config));
-})
+});
 
 setMinTimeBetweenRequests(1400);
 
-async function main(){
+async function main() {
     console.log("Started!");
 
     await GameTypes.update();

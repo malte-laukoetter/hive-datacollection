@@ -1,8 +1,8 @@
 import { TwitterBot } from "node-twitterbot";
-import * as fetch from 'node-fetch';
 import { GameMap, Player, GameTypes } from 'hive-api';
 import { NotificationSubscriber} from './discordWebhook';
 import { ChangeType } from "./team";
+import { TwitterHandleProvider } from "./TwitterHandleProvider";
 
 const sendWorldNameGameTypes = [GameTypes.BED.id, GameTypes.SKY.id, GameTypes.GNT.id];
 
@@ -18,8 +18,6 @@ export class NotificationTwitterBot implements NotificationSubscriber {
   }
 
   async sendNewMap(map: GameMap) {
-    
-    
     let message = `There is a new ${map.gameType.name} map on @theHiveMC!\n\n`
     
     if(map.mapName && map.mapName !== "UnknownMap"){
@@ -38,7 +36,7 @@ export class NotificationTwitterBot implements NotificationSubscriber {
 
       await Promise.all(
         getNamesFromMapAuthor(map.author)
-        .map(async name => twitterHandles.set(name, await getTwitterHandel(new Player(name))))
+          .map(async name => twitterHandles.set(name, await TwitterHandleProvider.instance.get(new Player(name))))
       );
 
       let author: string = map.author;
@@ -76,7 +74,7 @@ export class NotificationTwitterBot implements NotificationSubscriber {
 
   async sendTeamChange(player: Player, type: ChangeType) {
     let message = "";
-    let twitterHandle = await getTwitterHandel(player);
+    let twitterHandle = await TwitterHandleProvider.instance.get(player);
 
     if (twitterHandle === player.name) {
       message = `@${player.name} `;
@@ -124,26 +122,6 @@ export class NotificationTwitterBot implements NotificationSubscriber {
 
     this.send(message);
   }
-}
-
-
-const namemcUrl = `https://namemc.com/profile/`;
-
-function getNameMcTwitter(uuid) {
-  return fetch(namemcUrl + uuid)
-    .then(res => res.text())
-    .then(res => res.match(/(?:href=\"https:\/\/twitter\.com\/)((\w){1,15})(?=\" target)/))
-    .then(res => res ? res[1] ? res[1] : null : null)
-}
-
-async function getTwitterHandel(player){
-  let twitterHandle = await player.getTwitter();
-
-  if (!twitterHandle) {
-    twitterHandle = await getNameMcTwitter(player.uuid || player.name);
-  }
-
-  return twitterHandle;
 }
 
 function getNamesFromMapAuthor(str): string[] {
