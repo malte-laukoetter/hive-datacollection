@@ -18,6 +18,10 @@ export class NotificationSender {
     this.subscriptions.add(subscriber);
   }
 
+  sendCount(type, count: Number){
+    this.subscriptions.forEach(sub => sub.sendCount(type, count))
+  }
+
   send(message){
     this.subscriptions.forEach(sub => sub.send(message));
   }
@@ -35,6 +39,7 @@ export interface NotificationSubscriber {
   send(message);
   sendNewMap(map: GameMap);
   sendTeamChange(player: Player, type: ChangeType);
+  sendCount(type, count: Number);
 }
 
 export class DiscordWebhook extends WebhookClient implements NotificationSubscriber {
@@ -159,4 +164,6 @@ export class DiscordWebhook extends WebhookClient implements NotificationSubscri
 
     this.send(embed);
   }
+
+  sendCount(type, count: Number){}
 }

@@ -9,6 +9,7 @@ import {MedalUpdater} from "./medals";
 import {GamePlayersUpdater} from "./GamePlayersUpdater";
 import {PlayerStatsUpdater} from "./PlayerStatsUpdater";
 import {TotalKillsUpdater} from "./kills";
+import { UniquePlayerUpdater } from "./UniquePlayerUpdater";
 import { DiscordWebhook, NotificationSender } from "./discordWebhook";
 import { NotificationTwitterBot } from "./twitterBot";
 import { TwitterHandleProvider } from "./TwitterHandleProvider";
@@ -47,43 +48,49 @@ async function main() {
 
     await GameTypes.update();
 
-    console.log("Starting TeamUpdater");
-    new TeamUpdater(db).start();
+    if(!config.debug){
+        console.log("Starting TeamUpdater");
+        new TeamUpdater(db).start();
 
-    console.log("Starting MapUpdater");
-    new MapUpdater(db).start();
+        console.log("Starting MapUpdater");
+        new MapUpdater(db).start();
 
-    setTimeout(() => {
-        console.log("Starting MedalUpdater");
-        new MedalUpdater(db).start();
-        console.log("Starting TokensUpdater");
-        new TokensUpdater(db).start();
-    }, 40 * 1000);
+        console.log("Starting UniquePlayerCount Updater");
+        new UniquePlayerUpdater(db).start();
 
-    setTimeout(()=>{
-        console.log("Starting GamePlayersUpdater");
-        new GamePlayersUpdater(db).start();
-    }, 5*60*1000);
+        setTimeout(() => {
+            console.log("Starting MedalUpdater");
+            new MedalUpdater(db).start();
+            console.log("Starting TokensUpdater");
+            new TokensUpdater(db).start();
+        }, 40 * 1000);
 
-    setTimeout(()=>{
-        console.log("Starting TotalKillsUpdater");
-        new TotalKillsUpdater(db).start();
-    }, 6*60*1000);
+        setTimeout(() => {
+            console.log("Starting GamePlayersUpdater");
+            new GamePlayersUpdater(db).start();
+        }, 5 * 60 * 1000);
 
-    setTimeout(()=>{
-        console.log("Starting TotalPointsUpdater");
-        new TotalPointsUpdater(db).start();
-    }, 65*60*1000);
+        setTimeout(() => {
+            console.log("Starting TotalKillsUpdater");
+            new TotalKillsUpdater(db).start();
+        }, 6 * 60 * 1000);
 
-    setTimeout(()=>{
-        console.log("Starting AchievementUpdater");
-        new AchievementUpdater(db).start();
-    }, 125*60*1000);
+        setTimeout(() => {
+            console.log("Starting TotalPointsUpdater");
+            new TotalPointsUpdater(db).start();
+        }, 65 * 60 * 1000);
 
-    setTimeout(()=>{
-        console.log("Starting PlayerStatsUpdater");
-        new PlayerStatsUpdater(db).start();
-    }, 165*60*1000);
+        setTimeout(() => {
+            console.log("Starting AchievementUpdater");
+            new AchievementUpdater(db).start();
+        }, 125 * 60 * 1000);
+
+        setTimeout(() => {
+            console.log("Starting PlayerStatsUpdater");
+            new PlayerStatsUpdater(db).start();
+        }, 165 * 60 * 1000);
+    }else{
+    }
 }
 
 main().catch(console.error);

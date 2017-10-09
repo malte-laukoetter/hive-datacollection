@@ -18,18 +18,18 @@ export class TwitterHandleProvider {
   }
 
   async get(player: Player){
-    let twitterHandle = await player.getTwitter();
+    if (!player.uuid) {
+      await player.info();
+    }
+
+    let twitterHandle = await this.getFirebase(player.uuid);
+
+    if (!twitterHandle) {
+      twitterHandle = await player.getTwitter();
+    }
 
     if (!twitterHandle) {
       twitterHandle = await this.getNameMc(player.uuid || player.name);
-    }
-
-    if(!twitterHandle){
-      if(!player.uuid){
-        await player.info();
-      }
-
-      twitterHandle = await this.getFirebase(player.uuid);
     }
 
     return twitterHandle;

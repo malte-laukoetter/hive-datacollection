@@ -42,7 +42,7 @@ export class MapUpdater extends Updater {
       try {
         let maps = await type.maps(this._interval);
 
-        maps.filter(map => !this.oldData.has(type.id) || this.oldData.get(type.id).indexOf(map.worldName) === -1)
+        maps.filter(map => !this.oldData.has(type.id) || this.oldData.get(type.id).indexOf(map.worldName.toLowerCase()) === -1)
           .forEach(async map => this.addToList(map).catch(err => console.error(err + map.worldName)));
       }catch(err){
         Updater.sendError(err, `${type.id}/maps`);
@@ -81,9 +81,9 @@ export class MapUpdater extends Updater {
 
     this._oldDataRef.child(map.gameType.id).child(map.worldName).set(true).catch((res) => {throw new Error(res);});
     if(this.oldData.has(map.gameType.id)){
-      this.oldData.get(map.gameType.id).push(map.worldName);
+      this.oldData.get(map.gameType.id).push(map.worldName.toLowerCase());
     }else{
-      this.oldData.set(map.gameType.id, [map.worldName]);
+      this.oldData.set(map.gameType.id, [map.worldName.toLowerCase()]);
     }
   }
 }
