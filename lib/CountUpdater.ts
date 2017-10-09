@@ -27,7 +27,7 @@ export abstract class CountUpdater extends Updater {
   protected sendNotification(count: Number, type = this.countType){
     let currentCount = this.currentCount.get(type) || 0;
 
-    let number = this.notificationPositions.find(a => a > count && a < currentCount);
+    let number = this.notificationPositions.find(a => a < count && a > currentCount);
     if (number && currentCount > 0){
       NotificationSender.instance.sendCount(type, number);
     }

@@ -8,7 +8,7 @@ export class GamePlayersUpdater extends CountUpdater{
     constructor(db: admin.database.Database) {
         super(db.ref("gamemodeStats"));
 
-        this._interval = 1000 * 60 * 2;
+        this._interval = 1000 * 60 * 60;
     }
 
     async start(): Promise<any> {
