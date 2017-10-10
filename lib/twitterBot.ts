@@ -14,7 +14,9 @@ export class NotificationTwitterBot implements NotificationSubscriber {
   }
 
   send(message) {
-    this._bot.tweet(message);
+    this._bot.tweet(message,err => {
+      if(err) console.error(err);
+    });
   }
 
   async sendNewMap(map: GameMap) {
