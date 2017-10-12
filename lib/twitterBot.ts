@@ -116,10 +116,19 @@ export class NotificationTwitterBot implements NotificationSubscriber {
         break;
     }
 
-    let adv = `\n\nhttps://hive.lergin.de/team`
+    let adv = `\n\nhttps://hive.lergin.de/`
 
-    if (message.length + adv.length <= 140) {
+    if(message.length + adv.length + 'player/'.length + player.uuid.length <= 140){
       message += adv;
+      message += 'player/';
+      message += player.uuid;
+    } else if (message.length + adv.length + 'player/'.length + player.name.length <= 140){
+      message += adv;
+      message += 'player/';
+      message += player.name
+    } else if (message.length + adv.length + 'team'.length <= 140){
+      message += adv;
+      message += 'team';
     }
 
     this.send(message);
