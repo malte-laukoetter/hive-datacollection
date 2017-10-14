@@ -1,7 +1,7 @@
 import { TwitterBot } from "node-twitterbot";
 import { GameMap, Player, GameTypes, GameType } from 'hive-api';
-import { NotificationSubscriber} from './discordWebhook';
-import { ChangeType } from "./team";
+import { NotificationSubscriber } from './NotificationSubscriber';
+import { ChangeType } from "../updater/TeamUpdater";
 import { TwitterHandleProvider } from "./TwitterHandleProvider";
 
 const sendWorldNameGameTypes = [GameTypes.BED.id, GameTypes.SKY.id, GameTypes.GNT.id];
@@ -158,7 +158,7 @@ export class NotificationTwitterBot implements NotificationSubscriber {
   sendPlayerGameMode(amount, gameType: GameType){
     amount = amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 
-    let gameSpecificMessages = new Map([
+    const gameSpecificMessages = new Map([
       [
         GameTypes.BED.id, [
           `${amount} bees are defending their beds 🛏️ in BedWars on @theHiveMC`
@@ -193,7 +193,7 @@ export class NotificationTwitterBot implements NotificationSubscriber {
       ]
     ]);
     
-    let messages = [
+    const messages = [
       `${amount} players have played ${gameType.name} on @theHiveMC 🎉`,
       `${gameType.name} now had ${amount} unique players on @theHiveMC!`,
       `${amount} 🐝 played ${gameType.name} on @theHiveMC!`,

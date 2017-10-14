@@ -1,7 +1,6 @@
 import { CountUpdater } from "./CountUpdater";
 import { Server } from "hive-api";
 
-
 export class UniquePlayerUpdater extends CountUpdater {
   private _interval: number;
 

@@ -1,46 +1,9 @@
 import { GameMap, Player, GameTypes, GameType } from "hive-api";
-import { ChangeType } from "./team";
 import { WebhookClient, RichEmbed } from "discord.js";
+import { ChangeType } from "../updater/TeamUpdater";
+import { NotificationSubscriber } from "./NotificationSubscriber";
 
 const sendWorldNameGameTypes = [GameTypes.BED.id, GameTypes.SKY.id, GameTypes.GNT.id]
-
-export class NotificationSender {
-  private static _instance: NotificationSender = new NotificationSender();
-  private subscriptions: Set<NotificationSubscriber> = new Set();
-
-  constructor(){}
-  
-  static get instance(): NotificationSender {
-    return NotificationSender._instance;
-  }
-
-  register(subscriber: NotificationSubscriber){
-    this.subscriptions.add(subscriber);
-  }
-
-  sendCount(type, count: Number){
-    this.subscriptions.forEach(sub => sub.sendCount(type, count))
-  }
-
-  send(message){
-    this.subscriptions.forEach(sub => sub.send(message));
-  }
-
-  sendNewMap(map: GameMap) {
-    this.subscriptions.forEach(sub => sub.sendNewMap(map));
-  }
-
-  sendTeamChange(player: Player, type: ChangeType) {
-    this.subscriptions.forEach(sub => sub.sendTeamChange(player, type));
-  }
-}
-
-export interface NotificationSubscriber {
-  send(message);
-  sendNewMap(map: GameMap);
-  sendTeamChange(player: Player, type: ChangeType);
-  sendCount(type, count: Number);
-}
 
 export class DiscordWebhook extends WebhookClient implements NotificationSubscriber {
   private _doSendTeamChange: boolean = true;

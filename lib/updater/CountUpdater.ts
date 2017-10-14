@@ -1,5 +1,5 @@
 import {Updater} from "./Updater"
-import { NotificationSender } from "./discordWebhook"
+import { NotificationSender } from "../notifications/NotificationSender"
 
 export abstract class CountUpdater extends Updater {
   protected currentCount: Map<Object, Number> = new Map();

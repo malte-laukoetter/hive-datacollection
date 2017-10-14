@@ -1,7 +1,7 @@
 import {Player, Rank} from "hive-api"
 import {LeaderboardUpdater} from "./LeaderboardUpdater"
 
-export class TokensUpdater extends LeaderboardUpdater{
+export class TokenUpdater extends LeaderboardUpdater{
     constructor(db: admin.database.Database) {
         super(db.ref("tokenLeaderboard"), "tokens", 200, 10 * 1000, 1000 * 60 * 60);
     }

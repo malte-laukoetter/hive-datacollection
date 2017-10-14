@@ -1,6 +1,6 @@
-import { Updater } from "./Updater"
-import { NotificationSender } from "./discordWebhook"
 import { Player, Server, GameTypes, GameMap } from "hive-api";
+import { Updater } from "./Updater"
+import { NotificationSender } from "../notifications/NotificationSender"
 
 export class MapUpdater extends Updater {
   private _interval: number;

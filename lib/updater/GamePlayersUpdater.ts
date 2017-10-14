@@ -1,5 +1,5 @@
+import { GameType, GameTypes } from "hive-api";
 import { CountUpdater } from "./CountUpdater";
-import {GameType, GameTypes} from "hive-api";
 
 
 export class GamePlayersUpdater extends CountUpdater{

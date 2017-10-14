@@ -1,18 +1,20 @@
 import * as admin from "firebase-admin"
-import {TotalPointsUpdater} from "./totalPoints";
 import { GameTypes, setMinTimeBetweenRequests, GameMap, Player} from "hive-api";
-import { TeamUpdater, ChangeType} from "./team";
-import {MapUpdater} from "./maps";
-import {AchievementUpdater} from "./achievements";
-import {TokensUpdater} from "./tokens";
-import {MedalUpdater} from "./medals";
-import {GamePlayersUpdater} from "./GamePlayersUpdater";
-import {PlayerStatsUpdater} from "./PlayerStatsUpdater";
-import {TotalKillsUpdater} from "./kills";
-import { UniquePlayerUpdater } from "./UniquePlayerUpdater";
-import { DiscordWebhook, NotificationSender } from "./discordWebhook";
-import { NotificationTwitterBot } from "./twitterBot";
-import { TwitterHandleProvider } from "./TwitterHandleProvider";
+
+import { TotalPointsUpdater } from "./updater/TotalPointsUpdater";
+import { TeamUpdater, ChangeType} from "./updater/TeamUpdater";
+import { MapUpdater } from "./updater/MapUpdater";
+import { AchievementUpdater } from "./updater/AchievementUpdater";
+import { TokenUpdater } from "./updater/TokenUpdater";
+import { MedalUpdater } from "./updater/MedalUpdater";
+import { GamePlayersUpdater } from "./updater/GamePlayersUpdater";
+import { PlayerStatsUpdater } from "./updater/PlayerStatsUpdater";
+import { TotalKillsUpdater } from "./updater/TotalKillsUpdater"
+import { UniquePlayerUpdater } from "./updater/UniquePlayerUpdater";
+import { DiscordWebhook } from "./notifications/DiscordWebhook";
+import { NotificationSender } from "./notifications/NotificationSender";
+import { NotificationTwitterBot } from "./notifications/TwitterBot";
+import { TwitterHandleProvider } from "./notifications/TwitterHandleProvider";
 
 const config = require("../config.json");
 const serviceAccount = require("../firebase_service_account.json");
@@ -62,7 +64,7 @@ async function main() {
             console.log("Starting MedalUpdater");
             new MedalUpdater(db).start();
             console.log("Starting TokensUpdater");
-            new TokensUpdater(db).start();
+            new TokenUpdater(db).start();
         }, 40 * 1000);
 
         setTimeout(() => {

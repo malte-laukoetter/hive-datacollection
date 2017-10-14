@@ -1,6 +1,6 @@
-import {Updater} from "./Updater"
-import { NotificationSender } from "./discordWebhook"
-import {Player, Server} from "hive-api";
+import { Player, Server } from "hive-api";
+import { Updater } from "./Updater"
+import { NotificationSender } from "../notifications/NotificationSender"
 
 export enum ChangeType{
     MODERATOR_ADD = "MODERATOR_ADD",
