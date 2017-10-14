@@ -186,7 +186,7 @@ export class NotificationTwitterBot implements NotificationSubscriber {
       ],
       [
         "PMK", [
-          `${amount} pumpkins already tried infecting other players in ${gameType.name} on @theHiveMC!`,
+          `${amount} pumpkins already tried infecting other players in ${gameType.name} on @theHiveMC 👻👻👻`,
           `👻 ${amount} 🎃 are infecting players in ${gameType.name} on @theHiveMC 👻`,
           `${amount} 🎃 are chasing players in ${gameType.name} WOOoHOoo 👻`
         ]
