@@ -183,6 +183,13 @@ export class NotificationTwitterBot implements NotificationSubscriber {
         GameTypes.CAI.id, [
           `${amount} cowboys and indians tried to capture the opposing leader on @theHiveMC 🤠🏇`
         ]
+      ],
+      [
+        "PMK", [
+          `${amount} pumpkins already tried infecting other players in ${gameType.name} on @theHiveMC!`,
+          `👻 ${amount} 🎃 are infecting players in ${gameType.name} on @theHiveMC 👻`,
+          `${amount} 🎃 are chasing players in ${gameType.name} WOOoHOoo 👻`
+        ]
       ]
     ]);
     
