@@ -13,8 +13,8 @@ export class FirebaseConfig extends Config {
   }
 
   on(path, event, func) {
-    this._ref.child(FirebaseConfig.toFirebasePath(path)).on(event, (snap) => {
-      func(snap.val());
+    this._ref.child(FirebaseConfig.toFirebasePath(path)).on(event, snap => {
+      func(snap.val(), snap.key);
     });
   };
 

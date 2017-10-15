@@ -15,7 +15,7 @@ export class JsonConfig extends Config {
 
     for (let pathPart of pathParts) {
       if(!res[pathPart]) return null;
-      
+
       res = res[pathPart];
     }
 
@@ -28,7 +28,7 @@ export class JsonConfig extends Config {
         this.get(path).then(val => func(val));
         break;
       case ConfigEventType.CHILD_ADDED:
-        this.get(path).then(arr => arr.map(val => func(val)));
+        this.get(path).then(arr => arr.map((val, index) => func(val, index)));
         break;
     }
   }
