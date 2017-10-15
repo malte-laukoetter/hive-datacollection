@@ -70,7 +70,7 @@ export class DiscordWebhook extends WebhookClient implements NotificationSubscri
     if(map.author){
       embed.addField("Created by", `*${map.author}*`, true);
     }
-    embed.setFooter(`The map was just added to the API, it may take some weeks before you can play it on the server`);
+    embed.setFooter(`The map was just added to the API, it may take some time before you can play it on the server`);
 
     this.send(embed);
   }

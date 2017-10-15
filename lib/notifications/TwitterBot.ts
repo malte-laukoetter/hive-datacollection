@@ -3,6 +3,7 @@ import { GameMap, Player, GameTypes, GameType } from 'hive-api';
 import { NotificationSubscriber } from './NotificationSubscriber';
 import { ChangeType } from "../updater/TeamUpdater";
 import { TwitterHandleProvider } from "./TwitterHandleProvider";
+import { MessageProvider } from "./MessageProvider";
 
 const sendWorldNameGameTypes = [GameTypes.BED.id, GameTypes.SKY.id, GameTypes.GNT.id];
 
@@ -14,7 +15,7 @@ export class NotificationTwitterBot implements NotificationSubscriber {
   }
 
   send(message) {
-    this._bot.tweet(message,err => {
+    this._bot.tweet(message, err => {
       if(err) console.error(err);
     });
   }
@@ -134,82 +135,14 @@ export class NotificationTwitterBot implements NotificationSubscriber {
     this.send(message);
   }
 
-  sendCount(type, count: Number) {
+  async sendCount(type, count: Number) {
     if(type === "uniquePlayers"){
-      this.sendUniquePlayer(count)
+      this.send(await MessageProvider.uniquePlayerTwitterMessage(count));
     }else if(type.name){
-      this.sendPlayerGameMode(count, type);
+      this.send(await MessageProvider.uniquePlayerGameTypeTwitterMessage(count, type));
     }else{
       throw new Error(`Unknown Type: ` + type);
     }
-  }
-
-  sendUniquePlayer(amount){
-    let messages = [
-      `${amount} unique players have joined @theHiveMC 🎉`,
-      `${amount} unique 🐝 have joined @theHiveMC!`,
-      `${amount} 🐝 have been flying on @theHiveMC 🎉`
-    ]
-    this.send(messages[Math.floor(Math.random() * messages.length)] + "\n\nhttps://hive.lergin.de")
-  }
-
- 
-
-  sendPlayerGameMode(amount, gameType: GameType){
-    amount = amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-
-    const gameSpecificMessages = new Map([
-      [
-        GameTypes.BED.id, [
-          `${amount} bees are defending their beds 🛏️ in BedWars on @theHiveMC`
-        ]
-      ], [
-        GameTypes.HIDE.id, [
-          `Did you already find all ${amount} players that are hiding and seeking on @theHiveMC?`
-        ]
-      ], [
-        GameTypes.LAB.id, [
-          `Dr Zuk 👨🏾‍🔬 had ${amount} test subjects testing the experiments in The Lab on @theHiveMC`
-        ]
-      ], [
-        GameTypes.DR.id, [
-          `${amount} tried to outrun the Death in DeathRun on @theHiveMC`
-        ]
-      ], [
-        GameTypes.DRAW.id, [
-          `${amount} 👩‍🎨👨‍🎨 have been drawing 🎨 in Draw It on @theHiveMC`
-        ]
-      ], [
-        GameTypes.CAI.id, [
-          `${amount} cowboys and indians tried to capture the opposing leader on @theHiveMC 🤠🏇`
-        ]
-      ],
-      [
-        "PMK", [
-          `${amount} pumpkins already tried infecting other players in ${gameType.name} on @theHiveMC 👻👻👻`,
-          `👻 ${amount} 🎃 are infecting players in ${gameType.name} on @theHiveMC 👻`,
-          `${amount} 🎃 are chasing players in ${gameType.name} WOOoHOoo 👻`
-        ]
-      ]
-    ]);
-    
-    const messages = [
-      `${amount} players have played ${gameType.name} on @theHiveMC 🎉`,
-      `${gameType.name} now had ${amount} unique players on @theHiveMC!`,
-      `${amount} 🐝 played ${gameType.name} on @theHiveMC!`,
-      `${amount} 🐝 have already tried ${gameType.name} on @theHiveMC!`,
-      `How many players have already played ${gameType.name} on @theHiveMC? ${amount} bees 🎉`
-    ];
-
-    let message = "";
-
-    if (!gameSpecificMessages.has(gameType.id) || Math.random() > 0.8){
-      message = messages[Math.floor(Math.random() * messages.length)];
-    }else{
-      message = gameSpecificMessages.get(gameType.id)[Math.floor(Math.random() * gameSpecificMessages.get(gameType.id).length)]
-    }
-
-    this.send(message + "\n\nhttps://hive.lergin.de")
   }
 }
 

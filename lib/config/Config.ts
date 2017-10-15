@@ -30,6 +30,10 @@ export abstract class Config {
     return this.instance.get(path);
   }
 
+  static async has(path): Promise<Boolean> {
+    return (await Config.get(path)) !== null;
+  }
+
   abstract on(path: string, type: ConfigEventType, func: Function);
   static on(path: string, type: ConfigEventType, func: Function) {
     return this.instance.on(path, type, func);

@@ -36,79 +36,18 @@ if (configFile.use_firebase){
     new JsonConfig(configFile);
 }
 
-const discordWebhooks: Map<String, DiscordWebhook> = new Map();
-
-function registerWebhook(settings, key) {
-    if (!settings.id || !settings.key) throw new Error("Each webhook needs an id and a key!")
-
-    const discordWebhook = new DiscordWebhook(settings.id, settings.key);
-    discordWebhook.hiveEmojiId = settings.hiveEmojiId;
-    discordWebhook.doSendNewMaps = settings.sendNewMapMessage;
-    discordWebhook.doSendTeamChange = settings.sendTeamChangeMessage;
-    discordWebhook.mapGameTypes = settings.mapGameTypes;
-
-    discordWebhooks.set(key, discordWebhook);
-    NotificationSender.register(discordWebhook);
-}
-
-function unregisterWebhook(key) {
-    NotificationSender.unregister(discordWebhooks.get(key));
-    discordWebhooks.delete(key);
-}
-
-Config.on("discord.webhooks", ConfigEventType.CHILD_ADDED, (hook, key) => {
-    registerWebhook(hook, key);
-    console.log(`Registered DiscordWebhook ${hook.id} (${key})`);
-});
-
-Config.on("discord.webhooks", ConfigEventType.CHILD_CHANGED, (hook, key) => {
-    unregisterWebhook(key);
-    registerWebhook(hook, key);
-    console.log(`Updated DiscordWebhook ${hook.id} (${key})`);
-});
-
-Config.on("discord.webhooks", ConfigEventType.CHILD_REMOVED, (hook, key) => {
-    unregisterWebhook(key);
-    console.log(`Deleted DiscordWebhook ${hook.id} (${key})`);
-});
-
-
-const twitterBots: Map<String, NotificationTwitterBot> = new Map();
-
-Config.on("twitter.bots", ConfigEventType.CHILD_ADDED, (botConfig, key) => {
-    const bot = new NotificationTwitterBot(botConfig);
-    twitterBots.set(key, bot);
-    NotificationSender.register(bot);
-
-    console.log(`Registered TwitterBot ${botConfig.consumer_key} (${key})`);
-});
-
-Config.on("twitter", ConfigEventType.CHILD_CHANGED, (botConfig, key) => {
-    NotificationSender.unregister(twitterBots.get(key));
-
-    const bot = new NotificationTwitterBot(botConfig);
-    twitterBots.set(key, bot);
-    NotificationSender.register(bot);
-    
-    console.log(`Updated TwitterBot ${botConfig.consumer_key} (${key})`);
-});
-
-Config.on("twitter", ConfigEventType.CHILD_REMOVED, (botConfig, key) => {
-    NotificationSender.unregister(twitterBots.get(key));
-    twitterBots.delete(key);
-    
-    console.log(`Deleted TwitterBot ${botConfig.consumer_key} (${key})`);
-});
-
-
-setMinTimeBetweenRequests(1400);
-
 async function main() {
+    initDiscordWebhooks();
+
+    initTwitterBots();
+
+    setMinTimeBetweenRequests(1400);
+
     console.log("Started!");
 
     await GameTypes.update();
 
-    if(!await Config.get("debug")){
+    if(await Config.get("updater_active")){
         console.log("Starting TeamUpdater");
         new TeamUpdater(db).start();
 
@@ -154,3 +93,70 @@ async function main() {
 }
 
 main().catch(console.error);
+
+function initDiscordWebhooks(){
+    const discordWebhooks: Map<String, DiscordWebhook> = new Map();
+
+    function registerWebhook(settings, key) {
+        if (!settings.id || !settings.key) throw new Error("Each webhook needs an id and a key!")
+
+        const discordWebhook = new DiscordWebhook(settings.id, settings.key);
+        discordWebhook.hiveEmojiId = settings.hiveEmojiId;
+        discordWebhook.doSendNewMaps = settings.sendNewMapMessage;
+        discordWebhook.doSendTeamChange = settings.sendTeamChangeMessage;
+        discordWebhook.mapGameTypes = settings.mapGameTypes;
+
+        discordWebhooks.set(key, discordWebhook);
+        NotificationSender.register(discordWebhook);
+    }
+
+    function unregisterWebhook(key) {
+        NotificationSender.unregister(discordWebhooks.get(key));
+        discordWebhooks.delete(key);
+    }
+
+    Config.on("discord.webhooks", ConfigEventType.CHILD_ADDED, (hook, key) => {
+        registerWebhook(hook, key);
+        console.log(`Registered DiscordWebhook ${hook.id} (${key})`);
+    });
+
+    Config.on("discord.webhooks", ConfigEventType.CHILD_CHANGED, (hook, key) => {
+        unregisterWebhook(key);
+        registerWebhook(hook, key);
+        console.log(`Updated DiscordWebhook ${hook.id} (${key})`);
+    });
+
+    Config.on("discord.webhooks", ConfigEventType.CHILD_REMOVED, (hook, key) => {
+        unregisterWebhook(key);
+        console.log(`Deleted DiscordWebhook ${hook.id} (${key})`);
+    });
+}
+
+function initTwitterBots(){
+    const twitterBots: Map<String, NotificationTwitterBot> = new Map();
+
+    Config.on("twitter.bots", ConfigEventType.CHILD_ADDED, (botConfig, key) => {
+        const bot = new NotificationTwitterBot(botConfig);
+        twitterBots.set(key, bot);
+        NotificationSender.register(bot);
+
+        console.log(`Registered TwitterBot ${botConfig.consumer_key} (${key})`);
+    });
+
+    Config.on("twitter", ConfigEventType.CHILD_CHANGED, (botConfig, key) => {
+        NotificationSender.unregister(twitterBots.get(key));
+
+        const bot = new NotificationTwitterBot(botConfig);
+        twitterBots.set(key, bot);
+        NotificationSender.register(bot);
+
+        console.log(`Updated TwitterBot ${botConfig.consumer_key} (${key})`);
+    });
+
+    Config.on("twitter", ConfigEventType.CHILD_REMOVED, (botConfig, key) => {
+        NotificationSender.unregister(twitterBots.get(key));
+        twitterBots.delete(key);
+
+        console.log(`Deleted TwitterBot ${botConfig.consumer_key} (${key})`);
+    });
+}
