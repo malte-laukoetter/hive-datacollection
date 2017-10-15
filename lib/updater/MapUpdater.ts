@@ -55,7 +55,7 @@ export class MapUpdater extends Updater {
       let currentData = snap.val();
 
       if(currentData === null){
-        NotificationSender.instance.sendNewMap(map);
+        NotificationSender.sendNewMap(map);
 
         return this._dataRef.child(map.worldName).set({
           date: new Date().getTime(),

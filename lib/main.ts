@@ -15,20 +15,23 @@ import { DiscordWebhook } from "./notifications/DiscordWebhook";
 import { NotificationSender } from "./notifications/NotificationSender";
 import { NotificationTwitterBot } from "./notifications/TwitterBot";
 import { TwitterHandleProvider } from "./notifications/TwitterHandleProvider";
+import { Config } from "./config/Config";
+import { JsonConfig } from "./config/JsonConfig";
 
-const config = require("../config.json");
 const serviceAccount = require("../firebase_service_account.json");
+
+new JsonConfig(require("../config.json"));
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: config.firebase.databaseURL
+    databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
 });
 
 const db = admin.database();
 
 new TwitterHandleProvider(db.ref("twitterHandles"));
 
-config.discord.webhooks.forEach(hook => {
+Config.get("discord.webhooks").then(val => val.forEach(hook => {
     if(!hook.id || !hook.key) throw new Error("Each webhook needs an id and a key!")
 
     const discordWebhook = new DiscordWebhook(hook.id, hook.key);
@@ -36,12 +39,12 @@ config.discord.webhooks.forEach(hook => {
     discordWebhook.doSendNewMaps = hook.sendNewMapMessage;
     discordWebhook.doSendTeamChange = hook.sendTeamChangeMessage;
     discordWebhook.mapGameTypes = hook.mapGameTypes;
-    NotificationSender.instance.register(discordWebhook)
-});
+    NotificationSender.register(discordWebhook)
+}));
 
-config.twitter.forEach(config => {
-    NotificationSender.instance.register(new NotificationTwitterBot(config));
-});
+Config.get("twitter").then(val => val.forEach(config => {
+    NotificationSender.register(new NotificationTwitterBot(config));
+}));
 
 setMinTimeBetweenRequests(1400);
 
@@ -50,7 +53,7 @@ async function main() {
 
     await GameTypes.update();
 
-    if(!config.debug){
+    if(!await Config.get("debug")){
         console.log("Starting TeamUpdater");
         new TeamUpdater(db).start();
 

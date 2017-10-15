@@ -3,32 +3,30 @@ import { NotificationSubscriber } from "./NotificationSubscriber";
 import { ChangeType } from "../updater/TeamUpdater";
 
 export class NotificationSender {
-  private static _instance: NotificationSender = new NotificationSender();
-  private subscriptions: Set<NotificationSubscriber> = new Set();
+  private static subscriptions: Set<NotificationSubscriber> = new Set();
 
-  constructor() { }
-
-  static get instance(): NotificationSender {
-    return NotificationSender._instance;
+  static register(subscriber: NotificationSubscriber) {
+    NotificationSender.subscriptions.add(subscriber);
+    console.log(NotificationSender.subscriptions)
   }
 
-  register(subscriber: NotificationSubscriber) {
-    this.subscriptions.add(subscriber);
+  static unregister(subscriber: NotificationSubscriber) {
+    NotificationSender.subscriptions.delete(subscriber);
   }
 
-  sendCount(type, count: Number) {
-    this.subscriptions.forEach(sub => sub.sendCount(type, count))
+  static sendCount(type, count: Number) {
+    NotificationSender.subscriptions.forEach(sub => sub.sendCount(type, count))
   }
 
-  send(message) {
-    this.subscriptions.forEach(sub => sub.send(message));
+  static send(message) {
+    NotificationSender.subscriptions.forEach(sub => sub.send(message));
   }
 
-  sendNewMap(map: GameMap) {
-    this.subscriptions.forEach(sub => sub.sendNewMap(map));
+  static sendNewMap(map: GameMap) {
+    NotificationSender.subscriptions.forEach(sub => sub.sendNewMap(map));
   }
 
-  sendTeamChange(player: Player, type: ChangeType) {
-    this.subscriptions.forEach(sub => sub.sendTeamChange(player, type));
+ static sendTeamChange(player: Player, type: ChangeType) {
+   NotificationSender.subscriptions.forEach(sub => sub.sendTeamChange(player, type));
   }
 }

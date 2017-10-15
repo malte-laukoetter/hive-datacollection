@@ -1,4 +1,4 @@
-import {Updater} from "./Updater"
+import { Updater } from "./Updater"
 import { NotificationSender } from "../notifications/NotificationSender"
 
 export abstract class CountUpdater extends Updater {
@@ -27,7 +27,7 @@ export abstract class CountUpdater extends Updater {
 
     let number = this.notificationPositions.find(a => a < count && a > currentCount);
     if (number && currentCount > 0){
-      NotificationSender.instance.sendCount(type, number);
+      NotificationSender.sendCount(type, number);
     }
     this.currentCount.set(type, count);
   }

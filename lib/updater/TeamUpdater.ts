@@ -111,6 +111,6 @@ export class TeamUpdater extends Updater {
             type: type
         });
 
-        NotificationSender.instance.sendTeamChange(player, type);
+        NotificationSender.sendTeamChange(player, type);
     }
 }
