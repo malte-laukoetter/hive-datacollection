@@ -7,7 +7,6 @@ export class NotificationSender {
 
   static register(subscriber: NotificationSubscriber) {
     NotificationSender.subscriptions.add(subscriber);
-    console.log(NotificationSender.subscriptions)
   }
 
   static unregister(subscriber: NotificationSubscriber) {

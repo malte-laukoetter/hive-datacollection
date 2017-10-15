@@ -38,7 +38,7 @@ export class NotificationTwitterBot implements NotificationSubscriber {
 
       await Promise.all(
         getNamesFromMapAuthor(map.author)
-          .map(async name => twitterHandles.set(name, await TwitterHandleProvider.instance.get(new Player(name))))
+          .map(async name => twitterHandles.set(name, await TwitterHandleProvider.get(new Player(name))))
       );
 
       let author: string = map.author;
@@ -76,7 +76,7 @@ export class NotificationTwitterBot implements NotificationSubscriber {
 
   async sendTeamChange(player: Player, type: ChangeType) {
     let message = "";
-    let twitterHandle = await TwitterHandleProvider.instance.get(player);
+    let twitterHandle = await TwitterHandleProvider.get(player);
 
     if (twitterHandle === player.name) {
       message = `@${player.name} `;

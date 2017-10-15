@@ -15,12 +15,12 @@ import { DiscordWebhook } from "./notifications/DiscordWebhook";
 import { NotificationSender } from "./notifications/NotificationSender";
 import { NotificationTwitterBot } from "./notifications/TwitterBot";
 import { TwitterHandleProvider } from "./notifications/TwitterHandleProvider";
-import { Config } from "./config/Config";
+import { Config, ConfigEventType } from "./config/Config";
 import { JsonConfig } from "./config/JsonConfig";
+import { FirebaseConfig } from "./config/FirebaseConfig";
 
+const configFile = require("../config.json") || { use_firebase: true };
 const serviceAccount = require("../firebase_service_account.json");
-
-new JsonConfig(require("../config.json"));
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -29,10 +29,16 @@ admin.initializeApp({
 
 const db = admin.database();
 
-new TwitterHandleProvider(db.ref("twitterHandles"));
+if (configFile.use_firebase){
+    console.log(`Loading configuration from firebase (${serviceAccount.project_id})`);
+    new FirebaseConfig(db.ref("config"));
+}else{
+    console.log(`Loading configuration from config.json`);
+    new JsonConfig(configFile);
+}
 
-Config.get("discord.webhooks").then(val => val.forEach(hook => {
-    if(!hook.id || !hook.key) throw new Error("Each webhook needs an id and a key!")
+Config.on("discord.webhooks", ConfigEventType.CHILD_ADDED, hook => {
+    if (!hook.id || !hook.key) throw new Error("Each webhook needs an id and a key!")
 
     const discordWebhook = new DiscordWebhook(hook.id, hook.key);
     discordWebhook.hiveEmojiId = hook.hiveEmojiId;
@@ -40,11 +46,11 @@ Config.get("discord.webhooks").then(val => val.forEach(hook => {
     discordWebhook.doSendTeamChange = hook.sendTeamChangeMessage;
     discordWebhook.mapGameTypes = hook.mapGameTypes;
     NotificationSender.register(discordWebhook)
-}));
+});
 
-Config.get("twitter").then(val => val.forEach(config => {
+Config.on("twitter", ConfigEventType.CHILD_ADDED, config => {
     NotificationSender.register(new NotificationTwitterBot(config));
-}));
+});
 
 setMinTimeBetweenRequests(1400);
 

@@ -1,4 +1,4 @@
-export enum EventType {
+export enum ConfigEventType {
   VALUE = "value",
   CHILD_ADDED = "child_added",
   CHILD_CHANGED = "child_changed",
@@ -30,8 +30,8 @@ export abstract class Config {
     return this.instance.get(path);
   }
 
-  abstract on(path: string, type: EventType, func: ((any) => null));
-  static on(path: string, type: EventType, func: ((any) => null)) {
+  abstract on(path: string, type: ConfigEventType, func: Function);
+  static on(path: string, type: ConfigEventType, func: Function) {
     return this.instance.on(path, type, func);
   }
 

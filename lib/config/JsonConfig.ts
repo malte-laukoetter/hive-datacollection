@@ -1,4 +1,4 @@
-import {Config, EventType} from './Config'
+import { Config, ConfigEventType } from './Config'
 
 export class JsonConfig extends Config {
   private _json = {};
@@ -14,6 +14,8 @@ export class JsonConfig extends Config {
 
 
     for (let pathPart of pathParts) {
+      if(!res[pathPart]) return null;
+      
       res = res[pathPart];
     }
 
@@ -22,10 +24,10 @@ export class JsonConfig extends Config {
 
   on(path, event, func) {
     switch (event) {
-      case EventType.VALUE:
+      case ConfigEventType.VALUE:
         this.get(path).then(val => func(val));
         break;
-      case EventType.CHILD_ADDED:
+      case ConfigEventType.CHILD_ADDED:
         this.get(path).then(arr => arr.map(val => func(val)));
         break;
     }
