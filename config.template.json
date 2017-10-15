@@ -1,24 +1,42 @@
 {
+  "use_firebase": false,
   "discord": {
     "webhooks": [
       {
-        "key": "",
-        "id": "",
         "hiveEmojiId": "",
+        "id": "",
+        "key": "",
         "sendNewMapMessage": true,
         "sendTeamChangeMessage": true
       }
     ]
   },
-  "twitter": [
-    {
-      "consumer_secret": "",
-      "consumer_key": "",
-      "access_token": "",
-      "access_token_secret": ""
+  "twitter": {
+    "bots": [
+      {
+        "access_token": "",
+        "access_token_secret": "",
+        "consumer_key": "",
+        "consumer_secret": ""
+      }
+    ],
+    "handles": {
+      "uuid": "twittername",
+      "uuid2": "twittername2"
+    },
+    "messages": {
+      "uniquePlayerAmountGameType": {
+        "all": [
+          "AMOUNT will be replaced by the amount of unique players and GAMETYPE will be replaced by the name of the gametype"
+        ],
+        "GAMEID": [
+          "AMOUNT will be replaced by the amount of unique players"
+        ]
+      },
+      "uniquePlayerAmountServer": [
+        "AMOUNT will be replaced by the amount of unique players"
+      ]
     }
-  ],
-  "firebase": {
-    "databaseURL": "https://<DATABASE_NAME>.firebaseio.com"
-  }
+  },
+  "updater_active": true
 }
