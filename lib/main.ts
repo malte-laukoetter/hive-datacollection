@@ -1,4 +1,4 @@
-import * as admin from "firebase-admin"
+import * as admin from "firebase-admin";
 import { GameTypes, setMinTimeBetweenRequests, GameMap, Player} from "hive-api";
 
 import { TotalPointsUpdater } from "./updater/TotalPointsUpdater";
@@ -30,7 +30,7 @@ const db = admin.database();
 
 if (configFile.use_firebase){
     console.log(`Loading configuration from firebase (${serviceAccount.project_id})`);
-    new FirebaseConfig(db.ref("config"));
+    new FirebaseConfig(db.ref(configFile.firebase_config_path || "config"));
 }else{
     console.log(`Loading configuration from config.json`);
     new JsonConfig(configFile);

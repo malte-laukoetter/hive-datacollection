@@ -5,3 +5,4 @@ build
 *.log
 config.json
 config.prod.json
+heapdump-*
