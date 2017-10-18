@@ -60,12 +60,6 @@ export class NotificationTwitterBot implements NotificationSubscriber {
       message += ` by ${author}`;
     }
 
-    let note = `\n\nIt may not be playable yet...`
-
-    if (message.length + note.length <= 140) {
-      message += note;
-    }
-
     let adv = `\nhttps://hive.lergin.de/maps`
 
     if (message.length + adv.length <= 140) {
