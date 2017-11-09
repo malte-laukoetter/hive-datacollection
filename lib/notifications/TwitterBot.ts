@@ -106,6 +106,12 @@ export class NotificationTwitterBot implements NotificationSubscriber {
       case ChangeType.OWNER_REMOVE:
         message += `is no longer an Owner on @theHiveMC 😱`;
         break;
+      case ChangeType.NECTAR_ADD:
+        message = `${message} is now a part of @TeamNectar 😀`;
+        break;
+      case ChangeType.NECTAR_REMOVE:
+        message += `is no longer a part of @TeamNectar ☹️`;
+        break;
       default:
         message += `is now something else on @theHiveMC but we don't know what 🤔`;
         break;

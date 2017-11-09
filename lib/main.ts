@@ -89,6 +89,7 @@ async function main() {
             new PlayerStatsUpdater(db).start();
         }, 165 * 60 * 1000);
     }else{
+        new TeamUpdater(db).start();
     }
 }
 

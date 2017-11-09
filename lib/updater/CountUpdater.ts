@@ -13,7 +13,8 @@ export abstract class CountUpdater extends Updater {
     250000,
     500000,
     750000,
-    1500000
+    1500000,
+    2500000
   ].concat([...Array(100).keys()].map(a => (1 + a) * 1000000));
   private readonly countType;
 

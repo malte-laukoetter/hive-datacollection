@@ -10,7 +10,9 @@ export enum ChangeType{
     DEVELOPER_ADD = "DEVELOPER_ADD",
     DEVELOPER_REMOVE = "DEVELOPER_REMOVE",
     OWNER_ADD = "OWNER_ADD",
-    OWNER_REMOVE = "OWNER_REMOVE"
+    OWNER_REMOVE = "OWNER_REMOVE",
+    NECTAR_ADD = "NECTAR_ADD",
+    NECTAR_REMOVE = "NECTAR_REMOVE"
 }
 
 export class TeamUpdater extends Updater {
@@ -41,16 +43,18 @@ export class TeamUpdater extends Updater {
             let developers = await Server.developers(1000*60*10);
             let seniorModerators = await Server.seniorModerators(1000*60*10);
             let moderators = await Server.moderators(1000*60*10);
+            let nectar = await Server.nectar(1000*60*10);
 
             this._oldDataRef.once("value", snap => {
                 let data = snap.val();
 
                 if(!data) return;
 
-                let oldOwners: string[] = data.owners;
-                let oldDevelopers: string[] = data.developers;
-                let oldSeniorModerators: string[] = data.seniorModerators;
-                let oldModerators: string[] = data.moderators;
+                let oldOwners: string[] = data.owners || [];
+                let oldDevelopers: string[] = data.developers || [];
+                let oldSeniorModerators: string[] = data.seniorModerators || [];
+                let oldModerators: string[] = data.moderators || [];
+                let oldNectar: string[] = data.nectar || [];
 
                 owners.filter(player => oldOwners.indexOf(player.uuid) === -1)
                     .forEach(async player => this.addToChangeList(player, ChangeType.OWNER_ADD));
@@ -63,6 +67,9 @@ export class TeamUpdater extends Updater {
 
                 moderators.filter(player => oldModerators.indexOf(player.uuid) === -1)
                     .forEach(async player => this.addToChangeList(player, ChangeType.MODERATOR_ADD));
+
+                nectar.filter(player => oldNectar.indexOf(player.uuid) === -1)
+                    .forEach(async player => this.addToChangeList(player, ChangeType.NECTAR_ADD));
 
                 let ownersUuids = owners.map(player => player.uuid);
                 oldOwners.filter(uuid => ownersUuids.indexOf(uuid) === -1)
@@ -88,13 +95,19 @@ export class TeamUpdater extends Updater {
                     developersUuids.indexOf(uuid) === -1 &&
                     ownersUuids.indexOf(uuid) === -1
                 ).forEach(async uuid => this.addToChangeList(new Player(uuid), ChangeType.MODERATOR_REMOVE));
+               
+                let nectarUuids = nectar.map(player => player.uuid);
+                oldNectar.filter(uuid =>
+                    nectarUuids.indexOf(uuid) === -1
+                ).forEach(async uuid => this.addToChangeList(new Player(uuid), ChangeType.NECTAR_REMOVE));
 
                 this._oldDataRef.set({
                     "owners": owners.map(player => player.uuid),
                     "developers": developers.map(player => player.uuid),
                     "seniorModerators": seniorModerators.map(player => player.uuid),
-                    "moderators": moderators.map(player => player.uuid)
-                })
+                    "moderators": moderators.map(player => player.uuid),
+                    "nectar": nectar.map(player => player.uuid)
+                });
             })
         }catch(err){
             Updater.sendError(err, 'team');
