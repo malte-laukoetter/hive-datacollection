@@ -150,7 +150,6 @@ function getNamesFromMapAuthor(str): string[] {
   const blacklist = [
     "UnknownAuthor",
     "ProjectCondas",
-    "OdysseyBuilds",
     "and"
   ]
 

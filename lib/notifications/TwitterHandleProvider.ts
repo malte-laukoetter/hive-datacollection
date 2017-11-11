@@ -7,11 +7,15 @@ const namemcUrl = `https://namemc.com/profile/`;
 
 export class TwitterHandleProvider {
   static async get(player: Player){
-    if (!player.uuid) {
-      await player.info();
-    }
+    let twitterHandle = await this.getFirebase(player.name);
 
-    let twitterHandle = await this.getFirebase(player.uuid);
+    if (!twitterHandle){
+      if(!player.uuid) {
+        await player.info();
+      }
+
+      twitterHandle = await this.getFirebase(player.uuid);
+    }
 
     if (!twitterHandle) {
       twitterHandle = await player.getTwitter();
