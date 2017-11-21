@@ -74,7 +74,7 @@ export class NotificationTwitterBot implements NotificationSubscriber {
     let twitterHandle = await TwitterHandleProvider.get(player);
 
     if (twitterHandle === player.name) {
-      message = `@${player.name} `;
+      message = `.@${player.name} `;
     } else if (twitterHandle) {
       message = `${player.name} (@${twitterHandle}) `;
     } else {
