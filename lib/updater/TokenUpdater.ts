@@ -20,8 +20,6 @@ export class TokenUpdater extends LeaderboardUpdater {
             });
         } else {
             this._dataRef.child(info.uuid).remove();
-
-            throw new Error(`Didn't added ${info.uuid} to token leaderboard (is vip / dev / owner)`)
         }
     }
 

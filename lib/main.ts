@@ -19,7 +19,7 @@ import { JsonConfig } from "./config/JsonConfig";
 import { FirebaseConfig } from "./config/FirebaseConfig";
 
 const configFile = require("../config.json") || { use_firebase: true };
-const serviceAccount = require("../firebase_service_account_test.json");
+const serviceAccount = require("../firebase_service_account.json");
 
 console.log(`Using firebase project: ${serviceAccount.project_id}`)
 
