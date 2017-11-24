@@ -1,6 +1,7 @@
 import * as admin from "firebase-admin"
 import {Player} from "hive-api";
 import {Updater} from "./Updater";
+import { UpdateService } from "./UpdateService";
 
 export abstract class LeaderboardUpdater extends Updater{
     protected _property: string;
@@ -24,10 +25,12 @@ export abstract class LeaderboardUpdater extends Updater{
     }
 
     async start(){
-        this._newPlayerRef.on("child_added", snap => {
+        this._newPlayerRef.on("child_added", async snap => {
             let player: Player = new Player(snap.key);
 
-            this.updateInfo(player).then(()=>{
+            await UpdateService.requestPlayerInfoUpdate(player, 1000*60*60*24*30);
+
+            this.requestUpdate(player).then(()=>{
                 this._newPlayerRef.child(snap.key).remove();
                 return;
             }).catch((err)=>console.error(`error while adding ${snap.key}: ${err.message}`));
@@ -45,7 +48,7 @@ export abstract class LeaderboardUpdater extends Updater{
             if(!a.done){
                 this._waitingPlayers.delete(a.value);
 
-                this.updateInfo(a.value).then(() => {
+                this.requestUpdate(a.value).then(() => {
                     setTimeout(()=>{
                         this._waitingPlayers.add(a.value);
                         return;
@@ -62,5 +65,5 @@ export abstract class LeaderboardUpdater extends Updater{
         }, this._intervalAll);
     }
 
-    abstract async updateInfo(player: Player);
+    abstract async requestUpdate(player: Player);
 }

@@ -1,6 +1,7 @@
 node_modules
 .idea
 firebase_service_account.json
+firebase_service_account_test.json
 build
 *.log
 config.json

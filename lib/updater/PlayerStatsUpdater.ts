@@ -1,5 +1,6 @@
-import {Updater} from "./Updater";
-import {Achievement, GameTypes, Player, PlayerGameInfo, PlayerInfo} from "hive-api";
+import { Updater } from "./Updater";
+import { Achievement, GameTypes, GameType, Player, PlayerGameInfo, PlayerInfo } from "hive-api";
+import { UpdateService } from "./UpdateService";
 
 const ONE_DAY = 24*60*60*1000;
 
@@ -26,6 +27,8 @@ export class PlayerStatsUpdater extends Updater {
         // not monthly but all 30 days
         this.currentMonthlyRef = this._ref.child("monthly").child((PlayerStatsUpdater.dayOfYear(new Date()) % 30).toString());
         this.prevMonthlyRef = this._ref.child("monthly").child(((PlayerStatsUpdater.dayOfYear(new Date()) - 1) % 30).toString());
+
+        UpdateService.registerAllPlayerGameInfosUpdater((gameInfos, player, playerInfo) => this.update(gameInfos, player, playerInfo), "Player Stats Updater");
     }
 
     async start(): Promise<any> {
@@ -47,63 +50,65 @@ export class PlayerStatsUpdater extends Updater {
         return;
     }
 
+    private update(gameInfos: Map<GameType, PlayerGameInfo>, player: Player, playerInfo: PlayerInfo) {
+        if (playerInfo.uuid !== "") {
+            let tempDate = new Date();
+            tempDate.setHours(0, 0, 0, 0);
+
+            const date: string = tempDate.getTime().toString();
+
+            const playerRef = this.dataRef.child(player.uuid);
+
+            const gameInfosArr = [... gameInfos.values()]
+
+            // save total achievements
+            playerRef.child("achievements").child("total").child(date).set(
+                PlayerStatsUpdater.countUnlockedAchievements(playerInfo, gameInfosArr)
+            );
+
+            // save total points
+            playerRef.child("points").child("total").child(date).set(
+                PlayerStatsUpdater.countTotalPoints(gameInfosArr)
+            );
+
+            // save points for each gametype
+            gameInfosArr
+                .filter(info => info.hasOwnProperty("points"))
+                .forEach(info => {
+                    playerRef.child("points").child(info.type.id).child(date).set(info.points)
+                });
+
+            // save achievement count for each gametype
+            gameInfosArr
+                .filter(info => info.hasOwnProperty("achievements"))
+                .filter((info: any) => info.achievements)
+                .forEach((info: any) => {
+                    let count = (info.achievements as Achievement[]).filter(a => a.unlocked).length;
+
+                    playerRef.child("achievements").child(info.type.id).child(date).set(count);
+                });
+
+            if (playerInfo.achievements) {
+                // save global achievements
+                playerRef.child("achievements").child("global").child(date)
+                    .set(playerInfo.achievements.filter(a => a.unlocked).length);
+            }
+
+            // save medals and tokens
+            playerRef.child("medals").child(date).set(playerInfo.medals);
+            playerRef.child("tokens").child(date).set(playerInfo.tokens);
+
+            return true;
+        }
+    }
+
     async updatePlayerDate(player: Player): Promise<boolean> {
         await this.addToQueue();
 
         try {
-            let playerInfo: PlayerInfo = await player.info(ONE_DAY);
+            await UpdateService.requestAllPlayerGameInfosUpdate(player, ONE_DAY);
 
-            if (playerInfo.uuid !== "") {
-                // load the PlayerGameInfos for all GameTypes
-                let promises: Promise<PlayerGameInfo>[] = GameTypes.list.map(type => player.gameInfo(type, ONE_DAY));
-                let gameInfos: PlayerGameInfo[] = await Promise.all(promises);
-
-                let date: string = new Date().getTime().toString();
-
-                let playerRef = this.dataRef.child(player.uuid);
-
-                // save total achievements
-                playerRef.child("achievements").child("total").child(date).set(
-                    PlayerStatsUpdater.countUnlockedAchievements(playerInfo, gameInfos)
-                );
-
-                // save total points
-                playerRef.child("points").child("total").child(date).set(
-                    PlayerStatsUpdater.countTotalPoints(gameInfos)
-                );
-
-                // save points for each gametype
-                gameInfos
-                    .filter(info => info.hasOwnProperty("points"))
-                    .forEach(info => {
-                        playerRef.child("points").child(info.type.id).child(date).set(info.points)
-                    });
-
-                // save achievement count for each gametype
-                gameInfos
-                    .filter(info => info.hasOwnProperty("achievements"))
-                    .filter((info: any) => info.achievements)
-                    .forEach((info: any) => {
-                        let count = (info.achievements as Achievement[]).filter(a => a.unlocked).length;
-
-                        playerRef.child("achievements").child(info.type.id).child(date).set(count);
-                    });
-
-                if(playerInfo.achievements) {
-                    // save global achievements
-                    playerRef.child("achievements").child("global").child(date)
-                        .set(playerInfo.achievements.filter(a => a.unlocked).length);
-                }
-
-                // save medals and tokens
-                playerRef.child("medals").child(date).set(playerInfo.medals);
-                playerRef.child("tokens").child(date).set(playerInfo.tokens);
-
-                return true;
-            }else{
-                return false;
-            }
-
+            return true;
         }catch(err) {
             if (err.name === "FetchError") {
                 console.error(`Error Response from Hive: ${player.uuid}`)

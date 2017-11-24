@@ -19,7 +19,9 @@ import { JsonConfig } from "./config/JsonConfig";
 import { FirebaseConfig } from "./config/FirebaseConfig";
 
 const configFile = require("../config.json") || { use_firebase: true };
-const serviceAccount = require("../firebase_service_account.json");
+const serviceAccount = require("../firebase_service_account_test.json");
+
+console.log(`Using firebase project: ${serviceAccount.project_id}`)
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -41,55 +43,66 @@ async function main() {
 
     initTwitterBots();
 
-    setMinTimeBetweenRequests(1400);
+    setMinTimeBetweenRequests((await Config.get('min_time_between_requests')) || 1400);
 
     console.log("Started!");
 
     await GameTypes.update();
 
     if(await Config.get("updater_active")){
+        const teamUpdater = new TeamUpdater(db);
+        const mapUpdater = new MapUpdater(db);
+        const uniquePlayerUpdater = new UniquePlayerUpdater(db);
+        const medalUpdater = new MedalUpdater(db);
+        const tokenUpdater = new TokenUpdater(db);
+        const gamePlayersUpdater = new GamePlayersUpdater(db);
+        const totalKillsUpdater = new TotalKillsUpdater(db);
+        const totalPointsUpdater = new TotalPointsUpdater(db);
+        const achievementUpdater = new AchievementUpdater(db);
+        const playerStatsUpdater = new PlayerStatsUpdater(db);
+
         console.log("Starting TeamUpdater");
-        new TeamUpdater(db).start();
+        teamUpdater.start();
 
         console.log("Starting MapUpdater");
-        new MapUpdater(db).start();
+        mapUpdater.start();
 
         console.log("Starting UniquePlayerCount Updater");
-        new UniquePlayerUpdater(db).start();
+        uniquePlayerUpdater.start();
 
         setTimeout(() => {
             console.log("Starting MedalUpdater");
-            new MedalUpdater(db).start();
+            medalUpdater.start();
             console.log("Starting TokensUpdater");
-            new TokenUpdater(db).start();
+            tokenUpdater.start();
         }, 40 * 1000);
 
         setTimeout(() => {
             console.log("Starting GamePlayersUpdater");
-            new GamePlayersUpdater(db).start();
+            gamePlayersUpdater.start();
         }, 5 * 60 * 1000);
 
         setTimeout(() => {
             console.log("Starting TotalKillsUpdater");
-            new TotalKillsUpdater(db).start();
+            totalKillsUpdater.start();
         }, 6 * 60 * 1000);
 
         setTimeout(() => {
             console.log("Starting TotalPointsUpdater");
-            new TotalPointsUpdater(db).start();
+            totalPointsUpdater.start();
         }, 65 * 60 * 1000);
 
         setTimeout(() => {
             console.log("Starting AchievementUpdater");
-            new AchievementUpdater(db).start();
+            achievementUpdater.start();
         }, 125 * 60 * 1000);
 
         setTimeout(() => {
             console.log("Starting PlayerStatsUpdater");
-            new PlayerStatsUpdater(db).start();
+            playerStatsUpdater.start();
         }, 165 * 60 * 1000);
     }else{
-        new TeamUpdater(db).start();
+        
     }
 }
 

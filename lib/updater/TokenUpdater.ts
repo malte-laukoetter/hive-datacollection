@@ -1,23 +1,31 @@
-import {Player, Rank} from "hive-api"
-import {LeaderboardUpdater} from "./LeaderboardUpdater"
+import { Player, PlayerInfo, Rank } from "hive-api"
+import { LeaderboardUpdater } from "./LeaderboardUpdater"
+import { UpdateService } from "./UpdateService"
 
-export class TokenUpdater extends LeaderboardUpdater{
+export class TokenUpdater extends LeaderboardUpdater {
+    static readonly BLOCKED_RANKS = [Rank.VIP, Rank.DEVELOPER, Rank.OWNER]
+
     constructor(db: admin.database.Database) {
         super(db.ref("tokenLeaderboard"), "tokens", 200, 10 * 1000, 1000 * 60 * 60);
+    
+        UpdateService.registerPlayerInfoUpdater(info => this.update(info), 'Token Leaderboard');
     }
 
-    async updateInfo(player: Player): Promise<any> {
-        return player.info(60*60*1000).then(info => {
-            if(info.rank === Rank.VIP || info.rank === Rank.DEVELOPER || info.rank === Rank.OWNER){
-                this._dataRef.child(player.uuid).remove();
-
-                throw new Error("player is vip / dev / owner")
-            }
-
-            return this._dataRef.child(player.uuid).update({
+    private update(info: PlayerInfo) {
+        if (TokenUpdater.BLOCKED_RANKS.indexOf(info.rank) == -1) {
+        
+            this._dataRef.child(info.uuid).update({
                 tokens: info.tokens,
                 name: info.name
             });
-        });
+        } else {
+            this._dataRef.child(info.uuid).remove();
+
+            throw new Error(`Didn't added ${info.uuid} to token leaderboard (is vip / dev / owner)`)
+        }
+    }
+
+    async requestUpdate(player: Player): Promise<any> {
+        return UpdateService.requestPlayerInfoUpdate(player, this._intervalUpdate);
     }
 }

@@ -1,51 +1,48 @@
-import {GameTypes, HidePlayerGameInfo, Player} from "hive-api"
-import {LeaderboardUpdater} from "./LeaderboardUpdater"
+import { GameTypes, GameType, Player, Achievement, PlayerGameInfo, PlayerInfo, HidePlayerGameInfo } from "hive-api"
+import { LeaderboardUpdater } from "./LeaderboardUpdater"
+import { UpdateService } from "./UpdateService"
 
-export class TotalKillsUpdater extends LeaderboardUpdater{
+export class TotalKillsUpdater extends LeaderboardUpdater {
+    private static readonly GAME_TYPES_WITH_KILLS: GameType[] = 
+        [... GameTypes.list.filter(type => type.playerGameInfoFactory.kills !== undefined), GameTypes.HIDE];
     protected _gamedataRef: admin.database.Reference;
 
     constructor(db: admin.database.Database) {
         super(db.ref("totalKillsLeaderboard"), "kills", 100, 30*1000, 1000 * 60 * 60 * 6);
 
         this._gamedataRef = this._ref.child("gamedata");
+
+        UpdateService.registerPlayerGameInfosUpdater(
+            TotalKillsUpdater.GAME_TYPES_WITH_KILLS,
+            (info, player, playerInfos) => this.update(info, player),
+            'Total Kills Leaderboard'
+        );
     }
 
-    async start() {
-        await GameTypes.update();
+    private update(gameInfos: Map<GameType, PlayerGameInfo>, player: Player) {
+        const kills = [... gameInfos.entries()].map(([type, gameInfo]) => {
 
-        return super.start();
+            if (gameInfo instanceof HidePlayerGameInfo && gameInfo.hiderKills && gameInfo.seekerKills) {
+                this._gamedataRef.child(player.uuid).child(GameTypes.HIDE.id).set(gameInfo.hiderKills + gameInfo.seekerKills);
+                    
+                return gameInfo.hiderKills + gameInfo.seekerKills;
+            } else if ((gameInfo as any).kills){
+                this._gamedataRef.child(player.uuid).child(type.id).set((gameInfo as any).kills);
+                return (gameInfo as any).kills;
+            }
+
+            return 0;
+        });
+
+        this._gamedataRef.child(player.uuid).child("name").set(player.name);
+        this._dataRef.child(player.uuid).update({
+            kills: kills.reduce((a, b) => a + b),
+            name: player.name
+        });
     }
 
-    async updateInfo(player: Player): Promise<any> {
-        return player.info(3*60*60*1000).then(async (info)=>{
-            let kills = await Promise.all(
-                GameTypes.list.filter(type => type.playerGameInfoFactory.kills !== undefined).map(type => {
-                    return player.gameInfo(type, 6*60*60*1000).then((info: any) => {
-                        if(info.kills){
-                            this._gamedataRef.child(player.uuid).child(type.id).set(info.kills);
-                            return info.kills;
-                        }
-
-                        return 0;
-                    })}
-                )
-            );
-
-            await player.gameInfo(GameTypes.HIDE, 6*60*60*1000).then((info: HidePlayerGameInfo) => {
-                if(info.hiderKills && info.seekerKills){
-                this._gamedataRef.child(player.uuid).child(GameTypes.HIDE.id).set(info.hiderKills + info.seekerKills);
-                kills.push(info.hiderKills + info.seekerKills);
-
-                }
-
-            });
-
-            this._gamedataRef.child(player.uuid).child("name").set(info.name);
-            this._dataRef.child(player.uuid).update({
-                kills: kills.reduce((a,b)=> a+b),
-                name: info.name
-            });
-        })
+    async requestUpdate(player: Player): Promise<any> {
+        return UpdateService.requestPlayerGameInfosUpdate(TotalKillsUpdater.GAME_TYPES_WITH_KILLS, player, this._intervalUpdate)
     }
 }
 

@@ -13,7 +13,7 @@ export abstract class Updater {
         if (err.name === "FetchError") {
             console.error(`Error Response from Hive: ${info}`)
         } else {
-            console.error(`error while updating ${info}: ${err.message}`)
+            console.error(`error while updating ${info}`, err)
         }
     }
 }

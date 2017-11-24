@@ -1,39 +1,43 @@
-import {GameTypes, Player} from "hive-api"
-import {LeaderboardUpdater} from "./LeaderboardUpdater"
+import { GameType, GameTypes, Player, PlayerGameInfo } from "hive-api"
+import { LeaderboardUpdater } from "./LeaderboardUpdater"
+import { UpdateService } from "./UpdateService";
 
-export class TotalPointsUpdater extends LeaderboardUpdater{
+export class TotalPointsUpdater extends LeaderboardUpdater {
+    private static readonly GAME_TYPES_WITH_POINTS: GameType[] = GameTypes.list.filter(type => type.playerGameInfoFactory.points !== undefined);
     protected _gamedataRef: admin.database.Reference;
 
     constructor(db: admin.database.Database) {
         super(db.ref("totalPointsLeaderboard"), "points", 100, 30*1000, 1000 * 60 * 60 * 6);
 
         this._gamedataRef = this._ref.child("gamedata");
+
+        UpdateService.registerPlayerGameInfosUpdater(
+            TotalPointsUpdater.GAME_TYPES_WITH_POINTS,
+            (info, player, playerInfos) => this.update(info, player),
+            'Total Points Leaderboard'
+        );
     }
 
-    async start() {
-        await GameTypes.update();
+    private update(gameInfos: Map<GameType, PlayerGameInfo>, player: Player) {
+        const points = [...gameInfos.entries()].map(([type, gameInfo]) => {
+            if(gameInfo.points){
+                this._gamedataRef.child(player.uuid).child(type.id).set(gameInfo.points);
 
-        return super.start();
+                return gameInfo.points;
+            }
+            
+            return 0;
+        });
+
+        this._gamedataRef.child(player.uuid).child("name").set(player.name);
+        this._dataRef.child(player.uuid).update({
+            points: points.reduce((a, b) => a + b),
+            name: player.name
+        });
     }
 
-    async updateInfo(player: Player): Promise<any> {
-        return player.info(3*60*60*1000).then(async (info)=>{
-            let points = await Promise.all(
-                GameTypes.list.map(type => {
-                    return player.gameInfo(type, 6*60*60*1000).then(info => info.points).then(points => {
-                        this._gamedataRef.child(player.uuid).child(type.id).set(points);
-
-                        return points;
-                    })}
-                )
-            );
-
-            this._gamedataRef.child(player.uuid).child("name").set(info.name);
-            this._dataRef.child(player.uuid).update({
-                points: points.reduce((a,b)=> a+b),
-                name: info.name
-            });
-        })
+    async requestUpdate(player: Player): Promise<any> {
+        return UpdateService.requestPlayerGameInfosUpdate(TotalPointsUpdater.GAME_TYPES_WITH_POINTS, player, this._intervalUpdate)
     }
 }
 
