@@ -36,7 +36,8 @@ export class UpdateService {
         UpdateService.playerInfoCache.set(player.uuid, info);
 
         UpdateService.sendPlayerGameInfosUpdates(player);
-      });
+      })
+      .catch(err => Updater.sendError(err, `player/${player.uuid}`));
   }
 
   static registerPlayerGameInfoUpdater(updateFunction: PlayerGameInfoUpdateFunction, name = updateFunction.name){
@@ -63,7 +64,8 @@ export class UpdateService {
         );
 
         UpdateService.updatePlayerGameInfosCache(gameType, player, info);
-      });
+      })
+      .catch(err => Updater.sendError(err, `player/${player.uuid}/${gameType.id}`));
   }
 
   static requestPlayerGameInfosUpdate(gameTypes: GameType[], player: Player, maxCacheAge: number = 60 * 60 * 1000){
@@ -106,8 +108,8 @@ export class UpdateService {
         .length;
 
       if (missingGameInfos == 0 && UpdateService.playerInfoCache.has(player.uuid)) {
-        // we don't want to call it to often so we limit it to once at a minute
-        if (lastCalls.has(player.uuid) && lastCalls.get(player.uuid) > (new Date().getTime() - 60 * 1000)) {
+        // we don't want to call it to often so we limit it to once every 5 min
+        if (lastCalls.has(player.uuid) && lastCalls.get(player.uuid) > (new Date().getTime() - 5 * 60 * 1000)) {
           return;
         }
 
