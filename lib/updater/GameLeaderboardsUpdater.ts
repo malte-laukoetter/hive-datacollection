@@ -8,8 +8,6 @@ import * as admin from "firebase-admin"
 import { GameType, Leaderboard, LeaderboardPlace } from "hive-api";
 import { Updater } from "./Updater";
 
-const ONE_DAY = 24 * 60 * 60 * 1000;
-
 export class GameLeaderboardUpdater extends Updater {
   private _interval: number;
   private _dataRef: admin.database.Reference;
@@ -55,11 +53,12 @@ export class GameLeaderboardUpdater extends Updater {
 
       // negative days or month are working and calculated correctly
       const oldLeaderboardData = [
-        { interval: "day",   data: await this.getDateRefForDate(new Date(date.getFullYear(),     date.getMonth(),     date.getDate() - ONE_DAY    )).once('value')},
-        { interval: "day3",  data: await this.getDateRefForDate(new Date(date.getFullYear(),     date.getMonth(),     date.getDate() - ONE_DAY * 3)).once('value')},
-        { interval: "week",  data: await this.getDateRefForDate(new Date(date.getFullYear(),     date.getMonth(),     date.getDate() - ONE_DAY * 7)).once('value')},
-        { interval: "month", data: await this.getDateRefForDate(new Date(date.getFullYear(),     date.getMonth() - 1, date.getDate()              )).once('value')},
-        { interval: "year",  data: await this.getDateRefForDate(new Date(date.getFullYear() - 1, date.getMonth(),     date.getDate()              )).once('value')}
+        { interval: "day",     data: await this.getDateRefForDate(new Date(date.getFullYear(),     date.getMonth(),     date.getDate() - 1)).once('value')},
+        { interval: "3days",   data: await this.getDateRefForDate(new Date(date.getFullYear(),     date.getMonth(),     date.getDate() - 3)).once('value')},
+        { interval: "week",    data: await this.getDateRefForDate(new Date(date.getFullYear(),     date.getMonth(),     date.getDate() - 7)).once('value')},
+        { interval: "month",   data: await this.getDateRefForDate(new Date(date.getFullYear(),     date.getMonth() - 1, date.getDate()    )).once('value')},
+        { interval: "6months", data: await this.getDateRefForDate(new Date(date.getFullYear(),     date.getMonth() - 6, date.getDate()    )).once('value')},
+        { interval: "year",    data: await this.getDateRefForDate(new Date(date.getFullYear() - 1, date.getMonth(),     date.getDate()    )).once('value')}
       ];
 
       leaderboardPlaces.forEach((place: LeaderboardPlace) => {
