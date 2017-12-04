@@ -7,6 +7,7 @@
 import * as admin from "firebase-admin"
 import { GameType, Leaderboard, LeaderboardPlace } from "hive-api";
 import { Updater } from "./Updater";
+import { Config } from "../config/Config";
 
 export class GameLeaderboardUpdater extends Updater {
   private _interval: number;
@@ -20,8 +21,18 @@ export class GameLeaderboardUpdater extends Updater {
     this._interval = 1000 * 60 * 60 * 24;
   }
 
-  private getDateRefForDate(date: Date){
-    return this._dataRef.child(date.getTime().toString());
+  private getDateRefForDate(dateOrUtcYear: Date): admin.database.Reference;
+  private getDateRefForDate(dateOrUtcYear: number, utcMonth: number, utcDate: number): admin.database.Reference;
+  private getDateRefForDate(dateOrUtcYear: Date | number, utcMonth?: number, utcDate?: number): admin.database.Reference{
+    if(typeof dateOrUtcYear === 'number'){
+      return this.getDateRefForDate(new Date(Date.UTC(dateOrUtcYear, utcMonth, utcDate)))      
+    }else{
+      return this._dataRef.child(dateOrUtcYear.toISOString().substr(0,10)) // ISO Date (without time)
+    }
+  }
+
+  private getDateRefData(utcYear: number, utcMonth: number, utcDate: number){
+    return this.getDateRefForDate(utcYear, utcMonth, utcDate).once('value').then(val => val.val())
   }
 
   async start() {
@@ -37,6 +48,8 @@ export class GameLeaderboardUpdater extends Updater {
     delete raw.humanIndex;
     delete raw.UUID;
     delete raw.username;
+
+    Object.entries(raw).filter(([key, val]) => typeof val !== 'number').forEach(([key]) => delete raw[key]);
     
     return raw;
   }
@@ -47,18 +60,18 @@ export class GameLeaderboardUpdater extends Updater {
 
       leaderboard.deleteCache();
 
-      const leaderboardPlaces = await leaderboard.load(0, 1000);
+      const leaderboardPlaces = await leaderboard.load(0, (await Config.get('game_leaderboard_size') || 1000));
 
       const date = new Date();
 
       // negative days or month are working and calculated correctly
       const oldLeaderboardData = [
-        { interval: "day",     data: await this.getDateRefForDate(new Date(date.getFullYear(),     date.getMonth(),     date.getDate() - 1)).once('value')},
-        { interval: "3days",   data: await this.getDateRefForDate(new Date(date.getFullYear(),     date.getMonth(),     date.getDate() - 3)).once('value')},
-        { interval: "week",    data: await this.getDateRefForDate(new Date(date.getFullYear(),     date.getMonth(),     date.getDate() - 7)).once('value')},
-        { interval: "month",   data: await this.getDateRefForDate(new Date(date.getFullYear(),     date.getMonth() - 1, date.getDate()    )).once('value')},
-        { interval: "6months", data: await this.getDateRefForDate(new Date(date.getFullYear(),     date.getMonth() - 6, date.getDate()    )).once('value')},
-        { interval: "year",    data: await this.getDateRefForDate(new Date(date.getFullYear() - 1, date.getMonth(),     date.getDate()    )).once('value')}
+        { interval: "day",     data: await this.getDateRefData(date.getFullYear(),     date.getMonth(),     date.getDate() - 1)},
+        { interval: "3days",   data: await this.getDateRefData(date.getFullYear(),     date.getMonth(),     date.getDate() - 3)},
+        { interval: "week",    data: await this.getDateRefData(date.getFullYear(),     date.getMonth(),     date.getDate() - 7)},
+        { interval: "month",   data: await this.getDateRefData(date.getFullYear(),     date.getMonth() - 1, date.getDate()    )},
+        { interval: "6months", data: await this.getDateRefData(date.getFullYear(),     date.getMonth() - 6, date.getDate()    )},
+        { interval: "year",    data: await this.getDateRefData(date.getFullYear() - 1, date.getMonth(),     date.getDate()    )}
       ];
 
       leaderboardPlaces.forEach((place: LeaderboardPlace) => {
@@ -67,22 +80,20 @@ export class GameLeaderboardUpdater extends Updater {
         res.uuid = place.player.uuid;
         res.name = place.player.name;
         res.place = place.place;
-        res.points = place.points;
         res.raw = GameLeaderboardUpdater.removeUnimportantRaw(place.raw);
         
         oldLeaderboardData
-        .filter(({data: oldData}) => oldData[place.player.uuid])
+        .filter(({data: oldData}) => oldData && oldData[place.player.uuid])
         .forEach(({interval: interval, data: oldData}) => {
           const oldPlayerData = oldData[place.player.uuid];
 
           res[interval] = {
-            place: oldPlayerData.place - place.place,
-            points: oldPlayerData.points - place.points,
-            raw: Object.keys(oldPlayerData.raw).map(key => oldPlayerData.raw[key] - place.raw[key])
+            place: place.place - oldPlayerData.place,
+            raw: Object.keys(oldPlayerData.raw).map(key => place.raw[key] - oldPlayerData.raw[key])
           }
         });
 
-        this.getDateRefForDate(new Date(date.getFullYear(), date.getMonth(), date.getDate())).child(place.player.uuid).set(res);
+        this.getDateRefForDate(date.getFullYear(), date.getMonth(), date.getDate()).child(place.player.uuid).set(res);
       });
     } catch (err) {
       Updater.sendError(err, `leaderboard/${this.gameType.id}`);

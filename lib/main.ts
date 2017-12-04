@@ -17,9 +17,10 @@ import { NotificationTwitterBot } from "./notifications/TwitterBot";
 import { Config, ConfigEventType } from "./config/Config";
 import { JsonConfig } from "./config/JsonConfig";
 import { FirebaseConfig } from "./config/FirebaseConfig";
+import { GameLeaderboardUpdater } from "./updater/GameLeaderboardsUpdater";
 
-const configFile = require("../config.json") || { use_firebase: true };
-const serviceAccount = require("../firebase_service_account.json");
+const configFile = require("../config.json") || { use_firebase: true, firebase_service_account: 'firebase_service_account.json' };
+const serviceAccount = require(`../${configFile.firebase_service_account}`);
 
 console.log(`Using firebase project: ${serviceAccount.project_id}`)
 
@@ -60,6 +61,7 @@ async function main() {
         const totalPointsUpdater = new TotalPointsUpdater(db);
         const achievementUpdater = new AchievementUpdater(db);
         const playerStatsUpdater = new PlayerStatsUpdater(db);
+        const gameLeaderboardUpdaters = GameTypes.list.map(type => new GameLeaderboardUpdater(db, type));
 
         console.log("Starting TeamUpdater");
         teamUpdater.start();
@@ -78,14 +80,19 @@ async function main() {
         }, 40 * 1000);
 
         setTimeout(() => {
+            console.log(`Starting ${gameLeaderboardUpdaters.length} GameLeaderboardsUpdaters`);
+            gameLeaderboardUpdaters.forEach(updater => updater.start());
+        }, 5 * 60 * 1000);
+
+        setTimeout(() => {
             console.log("Starting GamePlayersUpdater");
             gamePlayersUpdater.start();
-        }, 5 * 60 * 1000);
+        }, 8 * 60 * 1000);
 
         setTimeout(() => {
             console.log("Starting TotalKillsUpdater");
             totalKillsUpdater.start();
-        }, 6 * 60 * 1000);
+        }, 10 * 60 * 1000);
 
         setTimeout(() => {
             console.log("Starting TotalPointsUpdater");
@@ -102,7 +109,7 @@ async function main() {
             playerStatsUpdater.start();
         }, 165 * 60 * 1000);
     }else{
-        
+
     }
 }
 
