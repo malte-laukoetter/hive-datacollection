@@ -19,7 +19,13 @@ import { JsonConfig } from "./config/JsonConfig";
 import { FirebaseConfig } from "./config/FirebaseConfig";
 import { GameLeaderboardUpdater } from "./updater/GameLeaderboardsUpdater";
 
-const configFile = require("../config.json") || { use_firebase: true, firebase_service_account: 'firebase_service_account.json' };
+let configFile: any = { use_firebase: true, firebase_service_account: 'firebase_service_account.json' };
+try {
+    configFile = require("../config.json");
+} catch (ex) {
+    console.log(`No config file provided: Trying to load from firebase using firebase_service_account.json`);
+}
+
 const serviceAccount = require(`../${configFile.firebase_service_account}`);
 
 console.log(`Using firebase project: ${serviceAccount.project_id}`)
@@ -80,7 +86,7 @@ async function main() {
         }, 40 * 1000);
 
         setTimeout(() => {
-            console.log(`Starting ${gameLeaderboardUpdaters.length} GameLeaderboardsUpdaters`);
+            console.log(`Starting ${gameLeaderboardUpdaters.length} GameLeaderboardUpdaters`);
             gameLeaderboardUpdaters.forEach(updater => updater.start());
         }, 5 * 60 * 1000);
 
