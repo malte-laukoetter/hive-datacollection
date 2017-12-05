@@ -1,12 +1,13 @@
 import { GameType, GameTypes } from "hive-api";
 import { CountUpdater } from "./CountUpdater";
+import { database } from "firebase-admin";
 
 
 export class GamePlayersUpdater extends CountUpdater{
     private _interval: number;
-    private _currRef: admin.database.Reference;
+    private _currRef: database.Reference;
 
-    constructor(db: admin.database.Database) {
+    constructor(db: database.Database) {
         super(db.ref("gamemodeStats"));
 
         this._currRef = this._ref.child('curr');

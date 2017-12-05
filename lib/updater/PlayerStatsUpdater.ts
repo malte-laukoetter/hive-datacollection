@@ -1,22 +1,25 @@
 import { Updater } from "./Updater";
 import { Achievement, GameTypes, GameType, Player, PlayerGameInfo, PlayerInfo } from "hive-api";
 import { UpdateService } from "./UpdateService";
+import { database } from "firebase-admin";
 
 const ONE_DAY = 24*60*60*1000;
 
 export class PlayerStatsUpdater extends Updater {
-    dataRef: admin.database.Reference;
-    dailyRef: admin.database.Reference;
-    currentWeeklyRef: admin.database.Reference;
-    prevWeeklyRef: admin.database.Reference;
-    currentMonthlyRef: admin.database.Reference;
-    prevMonthlyRef: admin.database.Reference;
+    private _ref: database.Reference;
+    dataRef: database.Reference;
+    dailyRef: database.Reference;
+    currentWeeklyRef: database.Reference;
+    prevWeeklyRef: database.Reference;
+    currentMonthlyRef: database.Reference;
+    prevMonthlyRef: database.Reference;
 
     queue: Set<()=>void> = new Set();
 
-    constructor(db: admin.database.Database) {
-        super(db.ref("playerStats"));
+    constructor(db: database.Database) {
+        super();
 
+        this._ref = db.ref("playerStats");
         this.dataRef = this._ref.child("data");
         this.dailyRef = this._ref.child("daily");
         this.currentWeeklyRef = this._ref.child("weekly").child((new Date()).getDay().toString());

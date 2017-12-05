@@ -1,11 +1,12 @@
 import { Player, PlayerInfo, Rank } from "hive-api"
 import { LeaderboardUpdater } from "./LeaderboardUpdater"
 import { UpdateService } from "./UpdateService"
+import { database } from "firebase-admin";
 
 export class TokenUpdater extends LeaderboardUpdater {
     static readonly BLOCKED_RANKS = [Rank.VIP, Rank.DEVELOPER, Rank.OWNER]
 
-    constructor(db: admin.database.Database) {
+    constructor(db: database.Database) {
         super(db.ref("tokenLeaderboard"), "tokens", 200, 10 * 1000, 1000 * 60 * 60);
     
         UpdateService.registerPlayerInfoUpdater(info => this.update(info), 'Token Leaderboard');

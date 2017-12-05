@@ -1,9 +1,10 @@
 import { Player, PlayerInfo } from "hive-api"
 import { LeaderboardUpdater } from "./LeaderboardUpdater"
 import { UpdateService } from "./UpdateService";
+import { database } from "firebase-admin";
 
 export class MedalUpdater extends LeaderboardUpdater {
-    constructor(db: admin.database.Database) {
+    constructor(db: database.Database) {
         super(db.ref("medalLeaderboard"), "medals", 200, 10 * 1000, 1000 * 60 * 60);
 
         UpdateService.registerPlayerInfoUpdater(info=>this.update(info), 'Medal Leaderboard');

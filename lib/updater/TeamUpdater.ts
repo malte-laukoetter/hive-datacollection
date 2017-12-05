@@ -1,6 +1,7 @@
 import { Player, Server } from "hive-api";
 import { Updater } from "./Updater"
 import { NotificationSender } from "../notifications/NotificationSender"
+import { database } from "firebase-admin";
 
 export enum ChangeType{
     MODERATOR_ADD = "MODERATOR_ADD",
@@ -17,12 +18,14 @@ export enum ChangeType{
 
 export class TeamUpdater extends Updater {
     private _interval: number;
-    private _dataRef: admin.database.Reference;
-    private _oldDataRef: admin.database.Reference;
+    private _dataRef: database.Reference;
+    private _oldDataRef: database.Reference;
+    private _ref: database.Reference;
 
-    constructor(db: admin.database.Database) {
-        super(db.ref("teamChanges"));
+    constructor(db: database.Database) {
+        super();
 
+        this._ref = db.ref("teamChanges");
         this._dataRef = this._ref.child("data");
         this._oldDataRef = this._ref.child("oldData");
 

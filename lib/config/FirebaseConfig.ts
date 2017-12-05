@@ -1,7 +1,8 @@
 import { Config } from './Config'
+import { database } from 'firebase-admin';
 
 export class FirebaseConfig extends Config {
-  private _ref: admin.database.Reference;
+  private _ref: database.Reference;
 
   constructor(ref) {
     super();

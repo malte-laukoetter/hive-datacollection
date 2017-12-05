@@ -1,16 +1,19 @@
 import { Player, Server, GameTypes, GameMap } from "hive-api";
 import { Updater } from "./Updater"
 import { NotificationSender } from "../notifications/NotificationSender"
+import { database } from "firebase-admin";
 
 export class MapUpdater extends Updater {
   private _interval: number;
   private oldData: Map<String, string[]> = new Map();
-  private _dataRef: admin.database.Reference;
-  private _oldDataRef: admin.database.Reference;
+  private _dataRef: database.Reference;
+  private _oldDataRef: database.Reference;
+  private _ref: database.Reference;
 
-  constructor(db: admin.database.Database) {
-    super(db.ref("maps"));
-
+  constructor(db: database.Database) {
+    super();
+    
+    this._ref = db.ref("maps");
     this._dataRef = this._ref.child("data");
     this._oldDataRef = this._ref.child("oldData");
 

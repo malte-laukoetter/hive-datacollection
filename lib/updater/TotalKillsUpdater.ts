@@ -1,12 +1,13 @@
 import { GameTypes, GameType, Player, Achievement, PlayerGameInfo, PlayerInfo, HidePlayerGameInfo } from "hive-api"
 import { LeaderboardUpdater } from "./LeaderboardUpdater"
 import { UpdateService } from "./UpdateService"
+import { database } from "firebase-admin";
 
 export class TotalKillsUpdater extends LeaderboardUpdater {
     private static readonly GAME_TYPES_WITH_KILLS: GameType[] = 
         [... GameTypes.list.filter(type => type.playerGameInfoFactory.kills !== undefined), GameTypes.HIDE];
 
-    constructor(db: admin.database.Database) {
+    constructor(db: database.Database) {
         super(db.ref("totalKillsLeaderboard"), "kills", 100, 30*1000, 1000 * 60 * 60 * 6);
 
         UpdateService.registerPlayerGameInfosUpdater(

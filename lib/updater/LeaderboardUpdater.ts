@@ -1,21 +1,23 @@
-import * as admin from "firebase-admin"
 import {Player} from "hive-api";
 import {Updater} from "./Updater";
 import { UpdateService } from "./UpdateService";
+import { database } from "firebase-admin";
 
 export abstract class LeaderboardUpdater extends Updater{
     protected _property: string;
     protected _limit: number;
     protected _intervalAll: number;
     protected _intervalUpdate: number;
-    protected _newPlayerRef: admin.database.Reference;
-    protected _dataRef: admin.database.Reference;
+    protected _newPlayerRef: database.Reference;
+    protected _dataRef: database.Reference;
+    protected _ref: database.Reference;
 
     protected _waitingPlayers: Set<Player> = new Set();
 
-    constructor(ref: admin.database.Reference, property: string, limit: number, intervalAll: number,
+    constructor(ref: database.Reference, property: string, limit: number, intervalAll: number,
                 intervalUpdate: number){
-        super(ref);
+        super();
+        this._ref = ref;
         this._property = property;
         this._limit = limit;
         this._intervalAll = intervalAll;

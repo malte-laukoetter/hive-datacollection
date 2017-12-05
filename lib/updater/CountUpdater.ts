@@ -1,5 +1,6 @@
 import { Updater } from "./Updater"
 import { NotificationSender } from "../notifications/NotificationSender"
+import { database } from "firebase-admin";
 
 export abstract class CountUpdater extends Updater {
   protected currentCount: Map<Object, Number> = new Map();
@@ -17,9 +18,11 @@ export abstract class CountUpdater extends Updater {
     2500000
   ].concat([...Array(100).keys()].map(a => (1 + a) * 1000000));
   private readonly countType;
+  protected _ref: database.Reference;
 
-  constructor(ref: admin.database.Reference, countType: String = ""){
-    super(ref);
+  constructor(ref: database.Reference, countType: String = ""){
+    super();
+    this._ref = ref;
     this.countType = countType;
   }
 

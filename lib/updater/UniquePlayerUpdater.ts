@@ -1,11 +1,12 @@
 import { CountUpdater } from "./CountUpdater";
 import { Server } from "hive-api";
+import { database } from "firebase-admin";
 
 export class UniquePlayerUpdater extends CountUpdater {
   private _interval: number;
-  private _currRef: admin.database.Reference;
+  private _currRef: database.Reference;
 
-  constructor(db: admin.database.Database) {
+  constructor(db: database.Database) {
     super(db.ref("uniquePlayers"), "uniquePlayers");
 
     this._currRef = db.ref("uniquePlayersCurr");

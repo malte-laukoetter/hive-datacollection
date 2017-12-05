@@ -1,29 +1,31 @@
 /*
- * Download the Leaderboard Data and the data from 1 day, 3 days, 1 week, 1 month, 3 months, 6 months, 1 year, 2 years ... ago
+ * Download the Leaderboard Data and the data from 1 day, 3 days, 1 week, 1 month, 6 months, 1 year ago
  * 
  * compare the data and save pos and data changes in properties for each of these dates
  */
 
-import * as admin from "firebase-admin"
 import { GameType, Leaderboard, LeaderboardPlace } from "hive-api";
 import { Updater } from "./Updater";
 import { Config } from "../config/Config";
+import { database } from "firebase-admin";
 
 export class GameLeaderboardUpdater extends Updater {
   private _interval: number;
-  private _dataRef: admin.database.Reference;
+  private _dataRef: database.Reference;
+  private _ref: database.Reference;
 
-  constructor(db: admin.database.Database, private readonly gameType: GameType) {
-    super(db.ref("gameLeaderboards"));
+  constructor(db: database.Database, private readonly gameType: GameType) {
+    super();
+    this._ref = db.ref("gameLeaderboards");
 
     this._dataRef = this._ref.child(gameType.id).child("data");
 
     this._interval = 1000 * 60 * 60 * 24;
   }
 
-  private getDateRefForDate(dateOrUtcYear: Date): admin.database.Reference;
-  private getDateRefForDate(dateOrUtcYear: number, utcMonth: number, utcDate: number): admin.database.Reference;
-  private getDateRefForDate(dateOrUtcYear: Date | number, utcMonth?: number, utcDate?: number): admin.database.Reference{
+  private getDateRefForDate(dateOrUtcYear: Date): database.Reference;
+  private getDateRefForDate(dateOrUtcYear: number, utcMonth: number, utcDate: number): database.Reference;
+  private getDateRefForDate(dateOrUtcYear: Date | number, utcMonth?: number, utcDate?: number): database.Reference{
     if(typeof dateOrUtcYear === 'number'){
       return this.getDateRefForDate(new Date(Date.UTC(dateOrUtcYear, utcMonth, utcDate)))      
     }else{
@@ -82,6 +84,7 @@ export class GameLeaderboardUpdater extends Updater {
         res.place = place.place;
         res.raw = GameLeaderboardUpdater.removeUnimportantRaw(place.raw);
         
+        // save the changes for the old data for every player that has data from the date
         oldLeaderboardData
         .filter(({data: oldData}) => oldData && oldData[place.player.uuid])
         .forEach(({interval: interval, data: oldData}) => {
