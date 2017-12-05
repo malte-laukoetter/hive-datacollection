@@ -1,4 +1,4 @@
-import * as admin from "firebase-admin";
+import { initializeApp, credential, database, firestore } from "firebase-admin";
 import { GameTypes, setMinTimeBetweenRequests, GameMap, Player} from "hive-api";
 
 import { TotalPointsUpdater } from "./updater/TotalPointsUpdater";
@@ -30,12 +30,13 @@ const serviceAccount = require(`../${configFile.firebase_service_account}`);
 
 console.log(`Using firebase project: ${serviceAccount.project_id}`)
 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+initializeApp({
+    credential: credential.cert(serviceAccount),
     databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
 });
 
-const db = admin.database();
+const db = database();
+const fireStore = firestore();
 
 if (configFile.use_firebase){
     console.log(`Loading configuration from firebase (${serviceAccount.project_id})`);
@@ -67,7 +68,7 @@ async function main() {
         const totalPointsUpdater = new TotalPointsUpdater(db);
         const achievementUpdater = new AchievementUpdater(db);
         const playerStatsUpdater = new PlayerStatsUpdater(db);
-        const gameLeaderboardUpdaters = GameTypes.list.map(type => new GameLeaderboardUpdater(db, type));
+    //    const gameLeaderboardUpdaters = GameTypes.list.map(type => new GameLeaderboardUpdater(fireStore, type));
 
         console.log("Starting TeamUpdater");
         teamUpdater.start();
@@ -86,8 +87,8 @@ async function main() {
         }, 40 * 1000);
 
         setTimeout(() => {
-            console.log(`Starting ${gameLeaderboardUpdaters.length} GameLeaderboardUpdaters`);
-            gameLeaderboardUpdaters.forEach(updater => updater.start());
+         //   console.log(`Starting ${gameLeaderboardUpdaters.length} GameLeaderboardUpdaters`);
+       //     gameLeaderboardUpdaters.forEach(updater => updater.start());
         }, 5 * 60 * 1000);
 
         setTimeout(() => {
@@ -115,7 +116,7 @@ async function main() {
             playerStatsUpdater.start();
         }, 165 * 60 * 1000);
     }else{
-
+        new GameLeaderboardUpdater(fireStore, GameTypes.BED).start();
     }
 }
 

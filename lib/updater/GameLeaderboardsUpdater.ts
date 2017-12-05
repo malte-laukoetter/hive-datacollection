@@ -7,34 +7,44 @@
 import { GameType, Leaderboard, LeaderboardPlace } from "hive-api";
 import { Updater } from "./Updater";
 import { Config } from "../config/Config";
-import { database } from "firebase-admin";
+import { database, firestore } from "firebase-admin";
+import { CollectionReference, DocumentReference, QuerySnapshot } from "@google-cloud/firestore";
 
 export class GameLeaderboardUpdater extends Updater {
   private _interval: number;
-  private _dataRef: database.Reference;
-  private _ref: database.Reference;
+  private _dataRef: CollectionReference;
+  private _ref: CollectionReference;
 
-  constructor(db: database.Database, private readonly gameType: GameType) {
+  constructor(db: firestore.Firestore, private readonly gameType: GameType) {
     super();
-    this._ref = db.ref("gameLeaderboards");
+    this._ref = db.collection("gameLeaderboards");
 
-    this._dataRef = this._ref.child(gameType.id).child("data");
+    this._dataRef = this._ref.doc(gameType.id).collection("dates");
 
     this._interval = 1000 * 60 * 60 * 24;
   }
 
-  private getDateRefForDate(dateOrUtcYear: Date): database.Reference;
-  private getDateRefForDate(dateOrUtcYear: number, utcMonth: number, utcDate: number): database.Reference;
-  private getDateRefForDate(dateOrUtcYear: Date | number, utcMonth?: number, utcDate?: number): database.Reference{
+  private getDateRefForDate(dateOrUtcYear: Date): DocumentReference;
+  private getDateRefForDate(dateOrUtcYear: number, utcMonth: number, utcDate: number): DocumentReference;
+  private getDateRefForDate(dateOrUtcYear: Date | number, utcMonth?: number, utcDate?: number): DocumentReference{
     if(typeof dateOrUtcYear === 'number'){
       return this.getDateRefForDate(new Date(Date.UTC(dateOrUtcYear, utcMonth, utcDate)))      
     }else{
-      return this._dataRef.child(dateOrUtcYear.toISOString().substr(0,10)) // ISO Date (without time)
+      return this._dataRef.doc(dateOrUtcYear.toISOString().substr(0,10)) // ISO Date (without time)
     }
   }
 
   private getDateRefData(utcYear: number, utcMonth: number, utcDate: number){
-    return this.getDateRefForDate(utcYear, utcMonth, utcDate).once('value').then(val => val.val())
+    return this.getDateRefForDate(utcYear, utcMonth, utcDate)
+      .collection("pages")
+      .get()
+      .then((snap: QuerySnapshot) => 
+        snap.docs
+          // load data
+          .map(doc => doc.data().data)
+           // save data to map with uuids as key and undo the pagination
+          .reduce((map, doc) => doc.reduce((map, ele) => map.set(ele.uuid, ele), map), new Map())
+      )
   }
 
   async start() {
@@ -62,9 +72,9 @@ export class GameLeaderboardUpdater extends Updater {
 
       leaderboard.deleteCache();
 
-      const leaderboardPlaces = await leaderboard.load(0, (await Config.get('game_leaderboard_size') || 1000));
+      const leaderboardPlaces: Map<number, LeaderboardPlace> = await leaderboard.load(0, (await Config.get('game_leaderboard_size') || 1000));
 
-      const date = new Date();
+      const date = new Date("2017-12-06");
 
       // negative days or month are working and calculated correctly
       const oldLeaderboardData = [
@@ -76,7 +86,8 @@ export class GameLeaderboardUpdater extends Updater {
         { interval: "year",    data: await this.getDateRefData(date.getFullYear() - 1, date.getMonth(),     date.getDate()    )}
       ];
 
-      leaderboardPlaces.forEach((place: LeaderboardPlace) => {
+      // convert data
+      const convData = [... leaderboardPlaces.values()].map((place: LeaderboardPlace) => {
         let res: any = {};
 
         res.uuid = place.player.uuid;
@@ -86,20 +97,46 @@ export class GameLeaderboardUpdater extends Updater {
         
         // save the changes for the old data for every player that has data from the date
         oldLeaderboardData
-        .filter(({data: oldData}) => oldData && oldData[place.player.uuid])
+        .filter(({data: oldData}) => oldData && oldData.has(place.player.uuid))
         .forEach(({interval: interval, data: oldData}) => {
-          const oldPlayerData = oldData[place.player.uuid];
+          const oldPlayerData = oldData.get(place.player.uuid);
 
           res[interval] = {
             place: place.place - oldPlayerData.place,
-            raw: Object.keys(oldPlayerData.raw).map(key => place.raw[key] - oldPlayerData.raw[key])
+            raw: Object.keys(oldPlayerData.raw)
+              // calc values for each key
+              .map(key => [key, place.raw[key] - oldPlayerData.raw[key]])
+              // put them together into one object
+              .reduce((obj, [key, val]) => {obj[key] = val; return obj}, {} )
           }
         });
 
-        this.getDateRefForDate(date.getFullYear(), date.getMonth(), date.getDate()).child(place.player.uuid).set(res);
+        return res;
+      });
+
+      const pageCol = this.getDateRefForDate(date.getFullYear(), date.getMonth(), date.getDate())
+        .collection("pages");
+
+      // paginate data in pages of 100 entries
+      GameLeaderboardUpdater.paginate(convData, 100)
+      // save pages to firestore
+      .forEach((page,index) => {
+        pageCol.doc((index * 100).toString()).create({data: page});
       });
     } catch (err) {
       Updater.sendError(err, `leaderboard/${this.gameType.id}`);
     }
+  }
+
+  private static paginate<T>(arr: T[], pageSize: number): T[][] {
+    return arr.reduce((paginated, data, index) => {
+      if (index % pageSize === 0) {
+        paginated.push([]);
+      }
+
+      paginated[Math.floor(index / pageSize) || 0].push(data);
+
+      return paginated;
+    }, []);
   }
 }
