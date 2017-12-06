@@ -67,8 +67,8 @@ async function main() {
         const totalKillsUpdater = new TotalKillsUpdater(db);
         const totalPointsUpdater = new TotalPointsUpdater(db);
         const achievementUpdater = new AchievementUpdater(db);
-        const playerStatsUpdater = new PlayerStatsUpdater(db);
-    //    const gameLeaderboardUpdaters = GameTypes.list.map(type => new GameLeaderboardUpdater(fireStore, type));
+        const playerStatsUpdater = new PlayerStatsUpdater(db, fireStore);
+        const gameLeaderboardUpdaters = GameTypes.list.map(type => new GameLeaderboardUpdater(fireStore, type));
 
         console.log("Starting TeamUpdater");
         teamUpdater.start();
@@ -87,8 +87,8 @@ async function main() {
         }, 40 * 1000);
 
         setTimeout(() => {
-         //   console.log(`Starting ${gameLeaderboardUpdaters.length} GameLeaderboardUpdaters`);
-       //     gameLeaderboardUpdaters.forEach(updater => updater.start());
+            console.log(`Starting ${gameLeaderboardUpdaters.length} GameLeaderboardUpdaters`);
+            gameLeaderboardUpdaters.forEach(updater => updater.start());
         }, 5 * 60 * 1000);
 
         setTimeout(() => {
@@ -116,7 +116,8 @@ async function main() {
             playerStatsUpdater.start();
         }, 165 * 60 * 1000);
     }else{
-        new GameLeaderboardUpdater(fireStore, GameTypes.BED).start();
+        new PlayerStatsUpdater(db, fireStore).start()
+//        new GameLeaderboardUpdater(fireStore, GameTypes.BED).start();
     }
 }
 

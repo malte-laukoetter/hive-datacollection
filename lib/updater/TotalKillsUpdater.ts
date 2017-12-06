@@ -19,7 +19,7 @@ export class TotalKillsUpdater extends LeaderboardUpdater {
 
     private update(gameInfos: Map<GameType, PlayerGameInfo>, player: Player) {
         const kills = [... gameInfos.entries()].map(([type, gameInfo]) => {
-            if (gameInfo instanceof HidePlayerGameInfo && gameInfo.hiderKills && gameInfo.seekerKills) {                   
+            if (gameInfo instanceof HidePlayerGameInfo && gameInfo.hiderKills && gameInfo.seekerKills) {
                 return gameInfo.hiderKills + gameInfo.seekerKills;
             } else if ((gameInfo as any).kills){
                 return (gameInfo as any).kills;

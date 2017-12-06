@@ -145,7 +145,7 @@ export class GameLeaderboardUpdater extends Updater {
       }
 
       // add the data to the current page
-      paginated[Math.floor(index / pageSize) || 0].push(data);
+      paginated[Math.floor(index / pageSize)].push(data);
 
       return paginated;
     }, []);

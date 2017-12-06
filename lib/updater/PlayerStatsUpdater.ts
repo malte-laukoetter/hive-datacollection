@@ -1,13 +1,15 @@
 import { Updater } from "./Updater";
 import { Achievement, GameTypes, GameType, Player, PlayerGameInfo, PlayerInfo } from "hive-api";
 import { UpdateService } from "./UpdateService";
-import { database } from "firebase-admin";
+import { database, firestore } from "firebase-admin";
+import { CollectionReference, DocumentReference } from "@google-cloud/firestore";
+import * as Utils from "../utils";
 
 const ONE_DAY = 24*60*60*1000;
 
 export class PlayerStatsUpdater extends Updater {
     private _ref: database.Reference;
-    dataRef: database.Reference;
+    dataRef: CollectionReference;
     dailyRef: database.Reference;
     currentWeeklyRef: database.Reference;
     prevWeeklyRef: database.Reference;
@@ -16,16 +18,16 @@ export class PlayerStatsUpdater extends Updater {
 
     queue: Set<()=>void> = new Set();
 
-    constructor(db: database.Database) {
+    constructor(db: database.Database, fs: firestore.Firestore) {
         super();
 
         this._ref = db.ref("playerStats");
-        this.dataRef = this._ref.child("data");
+        this.dataRef = fs.collection("players");
         this.dailyRef = this._ref.child("daily");
-        this.currentWeeklyRef = this._ref.child("weekly").child((new Date()).getDay().toString());
+        this.currentWeeklyRef = this._ref.child("weekly").child(new Date().getDay().toString());
 
         // weekly ref of next day (current day + 1 mod 7)
-        this.prevWeeklyRef = this._ref.child("weekly").child((((new Date()).getDay()) % 7).toString());
+        this.prevWeeklyRef = this._ref.child("weekly").child((new Date().getDay() % 7).toString());
 
         // not monthly but all 30 days
         this.currentMonthlyRef = this._ref.child("monthly").child((PlayerStatsUpdater.dayOfYear(new Date()) % 30).toString());
@@ -53,32 +55,32 @@ export class PlayerStatsUpdater extends Updater {
         return;
     }
 
+    private static setStats(doc: DocumentReference, data){
+        const tempObj = {};
+        tempObj[Utils.currentISODateString()] = data;
+        doc.set(tempObj, { merge: true });
+    }
+
     private update(gameInfos: Map<GameType, PlayerGameInfo>, player: Player, playerInfo: PlayerInfo) {
         if (playerInfo.uuid !== "") {
-            let tempDate = new Date();
-            tempDate.setHours(0, 0, 0, 0);
-
-            const date: string = tempDate.getTime().toString();
-
-            const playerRef = this.dataRef.child(player.uuid);
+            const playerRef = this.dataRef.doc(player.uuid);
+            const statsCollection = playerRef.collection("stats")
 
             const gameInfosArr = [... gameInfos.values()]
-
+            
             // save total achievements
-            playerRef.child("achievements").child("total").child(date).set(
-                PlayerStatsUpdater.countUnlockedAchievements(playerInfo, gameInfosArr)
-            );
-
+            const totalAchievements = PlayerStatsUpdater.countUnlockedAchievements(playerInfo, gameInfosArr);
+            PlayerStatsUpdater.setStats(statsCollection.doc("achievements_total"), totalAchievements);
+            
             // save total points
-            playerRef.child("points").child("total").child(date).set(
-                PlayerStatsUpdater.countTotalPoints(gameInfosArr)
-            );
+            const totalPoints = PlayerStatsUpdater.countTotalPoints(gameInfosArr);
+            PlayerStatsUpdater.setStats(statsCollection.doc("points_total"), totalPoints);
 
             // save points for each gametype
             gameInfosArr
                 .filter(info => info.hasOwnProperty("points"))
                 .forEach(info => {
-                    playerRef.child("points").child(info.type.id).child(date).set(info.points)
+                    PlayerStatsUpdater.setStats(statsCollection.doc(`points_${info.type.id}`), info.points);
                 });
 
             // save achievement count for each gametype
@@ -86,20 +88,40 @@ export class PlayerStatsUpdater extends Updater {
                 .filter(info => info.hasOwnProperty("achievements"))
                 .filter((info: any) => info.achievements)
                 .forEach((info: any) => {
-                    let count = (info.achievements as Achievement[]).filter(a => a.unlocked).length;
-
-                    playerRef.child("achievements").child(info.type.id).child(date).set(count);
+                    PlayerStatsUpdater.setStats(
+                        statsCollection.doc(`achievements_${info.type.id}`),
+                        (info.achievements as Achievement[]).filter(a => a.unlocked).length // amount of unlocked achievements
+                    );
                 });
 
             if (playerInfo.achievements) {
                 // save global achievements
-                playerRef.child("achievements").child("global").child(date)
-                    .set(playerInfo.achievements.filter(a => a.unlocked).length);
+                PlayerStatsUpdater.setStats(
+                    statsCollection.doc(`achievements_global`), 
+                    playerInfo.achievements.filter(a => a.unlocked).length
+                );
             }
 
             // save medals and tokens
-            playerRef.child("medals").child(date).set(playerInfo.medals);
-            playerRef.child("tokens").child(date).set(playerInfo.tokens);
+            PlayerStatsUpdater.setStats(statsCollection.doc("medals"), playerInfo.medals);
+            PlayerStatsUpdater.setStats(statsCollection.doc("points_total"), playerInfo.tokens);
+
+            playerRef.set({
+                total_points: totalPoints,
+                points: gameInfosArr
+                    .filter(info => info.hasOwnProperty("points"))
+                    .reduce((obj, info) => {
+                        obj[info.type.id] = info.points;
+                        return obj;
+                    }, {}),
+                total_achivements: totalAchievements,
+                achievements: gameInfosArr
+                    .filter(info => info.hasOwnProperty("achievements"))
+                    .reduce((obj, info: any) => {
+                        obj[info.type.id] = (info.achievements as Achievement[]).filter(a => a.unlocked).length;
+                        return obj;
+                    }, { global: playerInfo.achievements.filter(a => a.unlocked).length})
+            }, { merge: true });
 
             return true;
         }
