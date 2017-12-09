@@ -1,4 +1,4 @@
-import { GameType, GameTypes, Player, PlayerGameInfo } from "hive-api"
+import { GameType, GameTypes, Player, PlayerGameInfo, PlayerInfo } from "hive-api"
 import { LeaderboardUpdater } from "./LeaderboardUpdater"
 import { UpdateService } from "./UpdateService";
 import { database } from "firebase-admin";
@@ -10,17 +10,17 @@ export class TotalPointsUpdater extends LeaderboardUpdater {
 
         UpdateService.registerPlayerGameInfosUpdater(
             TotalPointsUpdater.GAME_TYPES_WITH_POINTS,
-            (info, player, playerInfos) => this.update(info, player),
+            (info, player, playerInfos) => this.update(info, player, playerInfos),
             'Total Points Leaderboard'
         );
     }
 
-    private update(gameInfos: Map<GameType, PlayerGameInfo>, player: Player) {
+    private update(gameInfos: Map<GameType, PlayerGameInfo>, player: Player, playerInfos: PlayerInfo) {
         const points = [...gameInfos.values()].filter(gameInfo => gameInfo.points).map(gameInfo => gameInfo.points);
 
         this._dataRef.child(player.uuid).update({
             points: points.reduce((a, b) => a + b, 0),
-            name: player.name
+            name: playerInfos.name
         });
     }
 

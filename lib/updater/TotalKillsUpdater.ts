@@ -28,18 +28,10 @@ export class TotalKillsUpdater extends LeaderboardUpdater {
             return 0;
         });
 
-        try{
-            this._dataRef.child(player.uuid).update({
-                kills: kills.reduce((a, b) => a + b, 0),
-                name: playerInfos.name
-            });
-        }catch(err){
-            console.error(err);
-            console.error(playerInfos);
-            console.error(player);
-            console.error(player.name);
-            console.error(kills);
-        }
+        this._dataRef.child(player.uuid).update({
+            kills: kills.reduce((a, b) => a + b, 0),
+            name: playerInfos.name
+        });
     }
 
     async requestUpdate(player: Player): Promise<any> {
