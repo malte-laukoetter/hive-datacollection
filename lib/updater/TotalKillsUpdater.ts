@@ -12,12 +12,12 @@ export class TotalKillsUpdater extends LeaderboardUpdater {
 
         UpdateService.registerPlayerGameInfosUpdater(
             TotalKillsUpdater.GAME_TYPES_WITH_KILLS,
-            (info, player, playerInfos) => this.update(info, player),
+            (info, player, playerInfos) => this.update(info, player, playerInfos),
             'Total Kills Leaderboard'
         );
     }
 
-    private update(gameInfos: Map<GameType, PlayerGameInfo>, player: Player) {
+    private update(gameInfos: Map<GameType, PlayerGameInfo>, player: Player, playerInfos: PlayerInfo) {
         const kills = [... gameInfos.entries()].map(([type, gameInfo]) => {
             if (gameInfo instanceof HidePlayerGameInfo && gameInfo.hiderKills && gameInfo.seekerKills) {
                 return gameInfo.hiderKills + gameInfo.seekerKills;
@@ -31,10 +31,11 @@ export class TotalKillsUpdater extends LeaderboardUpdater {
         try{
             this._dataRef.child(player.uuid).update({
                 kills: kills.reduce((a, b) => a + b, 0),
-                name: player.name
+                name: playerInfos.name
             });
         }catch(err){
             console.error(err);
+            console.error(playerInfos);
             console.error(player);
             console.error(player.name);
             console.error(kills);

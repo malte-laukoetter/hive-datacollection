@@ -31,8 +31,6 @@ export class AchievementUpdater extends LeaderboardUpdater{
                     info.achievements.filter(a => a.unlockedAt.getTime() >= 1262300400000).length;
             }
 
-            this._gamedataRef.child(player.uuid).child(type.id).set(gameTypeCount);
-
             achievementCount += gameTypeCount;
 
             return;
@@ -43,9 +41,6 @@ export class AchievementUpdater extends LeaderboardUpdater{
         if (playerInfo.achievements) {
             globalCount += playerInfo.achievements.filter(a => a.unlockedAt.getTime() >= 1262300400000).length;
         }
-
-        this._gamedataRef.child(player.uuid).child("GLOBAL").set(globalCount);
-        this._gamedataRef.child(player.uuid).child("name").set(playerInfo.name);
 
         achievementCount += globalCount;
 

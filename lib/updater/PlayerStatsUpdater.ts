@@ -1,16 +1,13 @@
 import { Updater } from "./Updater";
 import { Achievement, GameTypes, GameType, Player, PlayerGameInfo, PlayerInfo } from "hive-api";
 import { UpdateService } from "./UpdateService";
-import { database, firestore } from "firebase-admin";
-import { CollectionReference, DocumentReference } from "@google-cloud/firestore";
-import * as Utils from "../utils";
-import { Stats } from "../Stats";
+import { database } from "firebase-admin";
 
 const ONE_DAY = 24*60*60*1000;
 
 export class PlayerStatsUpdater extends Updater {
     private _ref: database.Reference;
-    dataRef: CollectionReference;
+    dataRef: database.Reference;
     dailyRef: database.Reference;
     currentWeeklyRef: database.Reference;
     prevWeeklyRef: database.Reference;
@@ -18,13 +15,12 @@ export class PlayerStatsUpdater extends Updater {
     prevMonthlyRef: database.Reference;
 
     queue: Set<()=>void> = new Set();
-    updated: Map<string, number> = new Map();
 
-    constructor(db: database.Database, fs: firestore.Firestore) {
+    constructor(db: database.Database) {
         super();
 
         this._ref = db.ref("playerStats");
-        this.dataRef = fs.collection("players");
+        this.dataRef = this._ref.child("data");
         this.dailyRef = this._ref.child("daily");
         this.currentWeeklyRef = this._ref.child("weekly").child(new Date().getDay().toString());
 
@@ -57,86 +53,56 @@ export class PlayerStatsUpdater extends Updater {
         return;
     }
 
-    private static setStats(doc: DocumentReference, data){
-        const tempObj = {};
-        tempObj[Utils.currentISODateString()] = data;
-        doc.set(tempObj, { merge: true });
-    }
-
-    private wasUpdatedToday(uuid: string){
-        return this.updated.has(uuid) && new Date().getTime() - ONE_DAY - this.updated.get(uuid) > 0; 
-    }
-
     private update(gameInfos: Map<GameType, PlayerGameInfo>, player: Player, playerInfo: PlayerInfo) {
-        if (playerInfo.uuid == "") return false;
-        if (this.wasUpdatedToday(playerInfo.uuid)) return false;
+        if (playerInfo.uuid !== "") {
+            let tempDate = new Date();
+            tempDate.setHours(0, 0, 0, 0);
 
-        const playerRef = this.dataRef.doc(player.uuid);
-        const statsCollection = playerRef.collection("stats")
+            const date: string = tempDate.getTime().toString();
 
-        const gameInfosArr = [... gameInfos.values()]
+            const playerRef = this.dataRef.child(player.uuid);
 
-        let playerInfosToSave = {
-            total_achievements: PlayerStatsUpdater.countUnlockedAchievements(playerInfo, gameInfosArr),
-            total_points: PlayerStatsUpdater.countTotalPoints(gameInfosArr),
-            points: gameInfosArr
+            const gameInfosArr = [...gameInfos.values()]
+        
+            // save total achievements
+            playerRef.child("achievements").child("total").child(date).set(
+                PlayerStatsUpdater.countUnlockedAchievements(playerInfo, gameInfosArr)
+            );
+        
+            // save total points
+            playerRef.child("points").child("total").child(date).set(
+                PlayerStatsUpdater.countTotalPoints(gameInfosArr)
+            );
+
+            // save points for each gametype
+            gameInfosArr
                 .filter(info => info.hasOwnProperty("points"))
-                .reduce((obj, info) => {
-                    obj[info.type.id] = info.points;
-                    return obj;
-                }, {}),
-            achievements: gameInfosArr
+                .forEach(info => {
+                        playerRef.child("points").child(info.type.id).child(date).set(info.points)
+                });
+
+            // save achievement count for each gametype
+            gameInfosArr
                 .filter(info => info.hasOwnProperty("achievements"))
                 .filter((info: any) => info.achievements)
-                .reduce((obj, info: any) => {
-                    obj[info.type.id] = (info.achievements as Achievement[]).filter(a => a.unlocked).length;
-                    return obj;
-                }, { global: playerInfo.achievements.filter(a => a.unlocked).length })
-        };
-        
-        // save total achievements
-        PlayerStatsUpdater.setStats(statsCollection.doc("achievements_total"), playerInfosToSave.total_achievements);
-        
-        // save total points
-        PlayerStatsUpdater.setStats(statsCollection.doc("points_total"), playerInfosToSave.total_points);
+                .forEach((info: any) => {
+                    let count = (info.achievements as Achievement[]).filter(a => a.unlocked).length;
 
-        // save points for each gametype
-        gameInfosArr
-            .filter(info => info.hasOwnProperty("points"))
-            .forEach(info => {
-                PlayerStatsUpdater.setStats(statsCollection.doc(`points_${info.type.id}`), info.points);
-            });
+                    playerRef.child("achievements").child(info.type.id).child(date).set(count);
+                });
 
-        // save achievement count for each gametype
-        gameInfosArr
-            .filter(info => info.hasOwnProperty("achievements"))
-            .filter((info: any) => info.achievements)
-            .forEach((info: any) => {
-                PlayerStatsUpdater.setStats(
-                    statsCollection.doc(`achievements_${info.type.id}`),
-                    (info.achievements as Achievement[]).filter(a => a.unlocked).length // amount of unlocked achievements
-                );
-            });
+            if (playerInfo.achievements) {
+                // save global achievements
+                playerRef.child("achievements").child("global").child(date)
+                    .set(playerInfo.achievements.filter(a => a.unlocked).length);
+            }
 
-        if (playerInfo.achievements) {
-            // save global achievements
-            PlayerStatsUpdater.setStats(
-                statsCollection.doc(`achievements_global`), 
-                playerInfo.achievements.filter(a => a.unlocked).length
-            );
+            // save medals and tokens
+            playerRef.child("medals").child(date).set(playerInfo.medals);
+            playerRef.child("tokens").child(date).set(playerInfo.tokens);
+
+            return true;
         }
-
-        // save medals and tokens
-        PlayerStatsUpdater.setStats(statsCollection.doc("medals"), playerInfo.medals);
-        PlayerStatsUpdater.setStats(statsCollection.doc("tokens"), playerInfo.tokens);
-
-        playerRef.set(playerInfosToSave, { merge: true });
-
-        this.updated.set(playerInfo.uuid, new Date().getTime());
-
-        Stats.track('player-stats-updates');
-
-        return true;
     }
 
     async updatePlayerDate(player: Player): Promise<boolean> {
@@ -181,20 +147,19 @@ export class PlayerStatsUpdater extends Updater {
     }
 
     addToQueue(): Promise<void>{
-        return new Promise((resolve)=>{
+        return new Promise((resolve) => {
             this.queue.add(resolve);
         });
     }
 
     updateDataFromUpdateRef(amount, currentRef, nextRef){
         currentRef.orderByValue().on("child_added", async snap => {
-            if(this.wasUpdatedToday(snap.key)) return;
 
             let success: boolean = await this.updatePlayerDate(new Player(snap.key));
 
             if(!success && snap.val() === 0){
 				currentRef.child(snap.key).set(-1);
-			}else if(!success && snap.val() === -1){
+            }else if(!success && snap.val() === -1){
                 currentRef.child(snap.key).remove();
             }else if(snap.val() >= amount){
                 nextRef.child(snap.key).set(0);

@@ -76,7 +76,7 @@ async function main() {
         const totalKillsUpdater = new TotalKillsUpdater(db);
         const totalPointsUpdater = new TotalPointsUpdater(db);
         const achievementUpdater = new AchievementUpdater(db);
-        const playerStatsUpdater = new PlayerStatsUpdater(db, fireStore);
+        const playerStatsUpdater = new PlayerStatsUpdater(db);
         const gameLeaderboardUpdaters = GameTypes.list.map(type => new GameLeaderboardUpdater(fireStore, type));
 
         console.log("Starting TeamUpdater");
@@ -126,7 +126,7 @@ async function main() {
         }, 165 * 60 * 1000);
     }else{
         console.warn(`!!! DEBUG MODE !!!`)
-        new PlayerStatsUpdater(db, fireStore).start()
+        new PlayerStatsUpdater(db).start()
 //        new GameLeaderboardUpdater(fireStore, GameTypes.BED).start();
     }
 }
