@@ -1,5 +1,6 @@
 import { toISODateString } from "./utils";
 import { Firestore } from "@google-cloud/firestore";
+import { setTimeout } from "timers";
 
 
 export function converter_playerstats_realtimedb_to_firestore(fireStore: Firestore, a){
@@ -11,15 +12,18 @@ export function converter_playerstats_realtimedb_to_firestore(fireStore: Firesto
     return obj;
   }
 
-  Object.entries(a).forEach(([uuid, data]) => {
+  Object.entries(a).forEach(([uuid, data], index) => {
+    setTimeout(() => {
     const playerRef = dataRef.doc(uuid);
     const statsCollection = playerRef.collection("stats");
 
     const medals = Object.entries(data.medals).reduce(reduceStatsToObj, {});
     statsCollection.doc("medals").set(medals);
 
-    const tokens = Object.entries(data.tokens).reduce(reduceStatsToObj, {});
-    statsCollection.doc("tokens").set(tokens);
+    if(data.tokens){
+      const tokens = Object.entries(data.tokens).reduce(reduceStatsToObj, {});
+      statsCollection.doc("tokens").set(tokens);
+    }
 
     Object.entries(data.achievements).map(([key, val]) => {
       const achievements = Object.entries(val).reduce(reduceStatsToObj, {});
@@ -39,13 +43,15 @@ export function converter_playerstats_realtimedb_to_firestore(fireStore: Firesto
           obj[key] = Object.entries(data.points[key]).sort(([key, val], [key2, val2]) => parseInt(key2) - parseInt(key))[0][1];
           return obj;
         }, {}),
-      total_achivements: Object.entries(data.achievements.total).sort(([key, val], [key2, val2]) => parseInt(key2) - parseInt(key))[0][1],
+      total_achievements: Object.entries(data.achievements.total).sort(([key, val], [key2, val2]) => parseInt(key2) - parseInt(key))[0][1],
       achievements: Object.entries(data.achievements)
         .filter(([key, val]) => key != 'total')
         .reduce((obj, [key, val]) => {
           obj[key] = Object.entries(data.achievements[key]).sort(([key, val], [key2, val2]) => parseInt(key2) - parseInt(key))[0][1];
           return obj;
         }, {}),
-    }, { merge: true });
+    }, { merge: true }).then(res => console.log(res)).catch(err => console.error);
+    console.log(`converting ${uuid}`)
+    }, index*500);
   });
 }

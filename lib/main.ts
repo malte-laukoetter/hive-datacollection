@@ -18,6 +18,7 @@ import { Config, ConfigEventType } from "./config/Config";
 import { JsonConfig } from "./config/JsonConfig";
 import { FirebaseConfig } from "./config/FirebaseConfig";
 import { GameLeaderboardUpdater } from "./updater/GameLeaderboardsUpdater";
+import { Stats } from "./Stats";
 
 let configFile: any = { use_firebase: true, firebase_service_account: 'firebase_service_account.json' };
 try {
@@ -54,6 +55,14 @@ async function main() {
     setMinTimeBetweenRequests((await Config.get('min_time_between_requests')) || 1400);
 
     console.log("Started!");
+
+    process.on('SIGTERM',() => {
+        Stats.print();
+
+        console.log(`Stopped!`);
+
+        process.exit();
+    });
 
     await GameTypes.update();
 
@@ -116,6 +125,7 @@ async function main() {
             playerStatsUpdater.start();
         }, 165 * 60 * 1000);
     }else{
+        console.warn(`!!! DEBUG MODE !!!`)
         new PlayerStatsUpdater(db, fireStore).start()
 //        new GameLeaderboardUpdater(fireStore, GameTypes.BED).start();
     }
@@ -172,7 +182,7 @@ function initTwitterBots(){
         console.log(`Registered TwitterBot ${botConfig.consumer_key} (${key})`);
     });
 
-    Config.on("twitter", ConfigEventType.CHILD_CHANGED, (botConfig, key) => {
+    Config.on("twitter.bots", ConfigEventType.CHILD_CHANGED, (botConfig, key) => {
         NotificationSender.unregister(twitterBots.get(key));
 
         const bot = new NotificationTwitterBot(botConfig);
@@ -182,7 +192,7 @@ function initTwitterBots(){
         console.log(`Updated TwitterBot ${botConfig.consumer_key} (${key})`);
     });
 
-    Config.on("twitter", ConfigEventType.CHILD_REMOVED, (botConfig, key) => {
+    Config.on("twitter.bots", ConfigEventType.CHILD_REMOVED, (botConfig, key) => {
         NotificationSender.unregister(twitterBots.get(key));
         twitterBots.delete(key);
 

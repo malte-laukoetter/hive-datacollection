@@ -19,7 +19,7 @@ export class TotalPointsUpdater extends LeaderboardUpdater {
         const points = [...gameInfos.values()].filter(gameInfo => gameInfo.points).map(gameInfo => gameInfo.points);
 
         this._dataRef.child(player.uuid).update({
-            points: points.reduce((a, b) => a + b),
+            points: points.reduce((a, b) => a + b, 0),
             name: player.name
         });
     }

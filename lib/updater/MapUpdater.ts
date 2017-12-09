@@ -1,7 +1,8 @@
-import { Player, Server, GameTypes, GameMap } from "hive-api";
+import { Player, Server, GameTypes, GameMap, GameType } from "hive-api";
 import { Updater } from "./Updater"
 import { NotificationSender } from "../notifications/NotificationSender"
 import { database } from "firebase-admin";
+import { Stats } from "../Stats";
 
 export class MapUpdater extends Updater {
   private _interval: number;
@@ -29,28 +30,52 @@ export class MapUpdater extends Updater {
   }
 
   async initUpdateInfo() {
-    await GameTypes.list.forEach(async type => {
-      try{
-        let maps = await type.maps();
+    await GameTypes.list.forEach(type => this.initUpdateInfoType(type));
+  }
 
-        await Promise.all(maps.map(async map => this.addToList(map)));
-      }catch(err) {
+  async initUpdateInfoType(type: GameType){
+    try {
+      let maps = await type.maps();
+
+      return Promise.all(maps.map(async map => this.addToList(map)));
+    } catch (err) {
+      if (err.name === "FetchError") {
+        return new Promise((resolve, reject) => {
+          Stats.track('fetch-error-maps');
+
+          setTimeout(() => {
+            resolve(this.initUpdateInfoType(type));
+          }, 60000);
+        });
+      } else {
         Updater.sendError(err, `${type.id}/maps`);
       }
-    });
+    }
+  }
+
+  async updateInfoType(type: GameType){
+    try {
+      let maps = await type.maps(this._interval);
+
+      maps.filter(map => !this.oldData.has(type.id) || this.oldData.get(type.id).indexOf(map.worldName.toLowerCase()) === -1)
+        .forEach(async map => this.addToList(map).catch(err => console.error(err + map.worldName)));
+    } catch (err) {
+      if (err.name === "FetchError") {
+        return new Promise((resolve, reject) => {
+          Stats.track('fetch-error-maps');
+
+          setTimeout(() => {
+            resolve(this.updateInfoType(type));
+          }, 60000);
+        });
+      } else {
+        Updater.sendError(err, `${type.id}/maps`);
+      }
+    }
   }
 
   async updateInfo() {
-    GameTypes.list.forEach(async type => {
-      try {
-        let maps = await type.maps(this._interval);
-
-        maps.filter(map => !this.oldData.has(type.id) || this.oldData.get(type.id).indexOf(map.worldName.toLowerCase()) === -1)
-          .forEach(async map => this.addToList(map).catch(err => console.error(err + map.worldName)));
-      }catch(err){
-        Updater.sendError(err, `${type.id}/maps`);
-      }
-    });
+    GameTypes.list.forEach(async type => this.updateInfoType(type));
   }
 
   async addToList(map: GameMap) {

@@ -1,5 +1,6 @@
 import { PlayerInfo, Player, PlayerGameInfo, GameType, GameTypes } from 'hive-api';
 import { Updater } from '../updater/Updater';
+import { Stats } from '../Stats';
 
 export type PlayerInfoUpdateFunction = (playerInfo: PlayerInfo, player: Player) => void;
 export type PlayerGameInfoUpdateFunction = (gameType: GameType, gameInfo: PlayerGameInfo, player: Player) => void;
@@ -37,7 +38,19 @@ export class UpdateService {
 
         UpdateService.sendPlayerGameInfosUpdates(player);
       })
-      .catch(err => Updater.sendError(err, `player/${player.uuid}`));
+      .catch(err => {
+        if (err.name === "FetchError") {
+          return new Promise((resolve, reject) => {
+            Stats.track('fetch-error-player-info');
+
+            setTimeout(() => {
+              resolve(UpdateService.requestPlayerInfoUpdate(player, maxCacheAge));
+            }, 60000);
+          });
+        } else {
+          Updater.sendError(err, `player/${player.uuid}`);
+        }
+      });
   }
 
   static registerPlayerGameInfoUpdater(updateFunction: PlayerGameInfoUpdateFunction, name = updateFunction.name){
@@ -65,7 +78,19 @@ export class UpdateService {
 
         UpdateService.updatePlayerGameInfosCache(gameType, player, info);
       })
-      .catch(err => Updater.sendError(err, `player/${player.uuid}/${gameType.id}`));
+      .catch(err => {
+        if (err.name === "FetchError") {
+          return new Promise((resolve, reject) => {
+            Stats.track('fetch-error-player-game-info');
+
+            setTimeout(() => {
+              resolve(UpdateService.requestPlayerGameInfoUpdate(gameType, player, maxCacheAge));
+            }, 60000);
+          });
+        } else {
+          Updater.sendError(err, `player/${player.uuid}/${gameType.id}`);
+        }
+      });
   }
 
   static requestPlayerGameInfosUpdate(gameTypes: GameType[], player: Player, maxCacheAge: number = 60 * 60 * 1000){
