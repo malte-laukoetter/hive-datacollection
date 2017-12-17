@@ -78,41 +78,13 @@ export class GameLeaderboardUpdater extends Updater {
 
       const date = new Date();
 
-      // negative days or month are working and calculated correctly
-      const oldLeaderboardData = [
-        { interval: "day",     data: await this.getDateRefData(date.getFullYear(),     date.getMonth(),     date.getDate() - 1)},
-        { interval: "3days",   data: await this.getDateRefData(date.getFullYear(),     date.getMonth(),     date.getDate() - 3)},
-        { interval: "week",    data: await this.getDateRefData(date.getFullYear(),     date.getMonth(),     date.getDate() - 7)},
-        { interval: "month",   data: await this.getDateRefData(date.getFullYear(),     date.getMonth() - 1, date.getDate()    )},
-        { interval: "6months", data: await this.getDateRefData(date.getFullYear(),     date.getMonth() - 6, date.getDate()    )},
-        { interval: "year",    data: await this.getDateRefData(date.getFullYear() - 1, date.getMonth(),     date.getDate()    )}
-      ];
-
       // convert data
       const convData = [... leaderboardPlaces.values()].map((place: LeaderboardPlace) => {
-        let res: any = {};
+        let res: any = GameLeaderboardUpdater.removeUnimportantRawData(place.raw);
 
         res.uuid = place.player.uuid;
         res.name = place.player.name;
         res.place = place.place;
-        res.raw = GameLeaderboardUpdater.removeUnimportantRawData(place.raw);
-        
-        // save the changes for the old data for every player that has data from the date
-        oldLeaderboardData
-          // test if there even is old data for the player as we can only store this if he was in the leaderboard at the given time
-          .filter(({data: oldData}) => oldData && oldData.has(place.player.uuid))
-          .forEach(({interval: interval, data: oldData}) => {
-            const oldPlayerData = oldData.get(place.player.uuid);
-
-            res[interval] = {
-              place: place.place - oldPlayerData.place,
-              raw: Object.keys(oldPlayerData.raw)
-                // calc values for each key
-                .map(key => [key, place.raw[key] - oldPlayerData.raw[key]])
-                // put them together into one object
-                .reduce((obj, [key, val]) => {obj[key] = val; return obj}, {} )
-            }
-          });
 
         return res;
       });
