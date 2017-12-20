@@ -19,32 +19,19 @@ export class GameLeaderboardUpdater extends Updater {
     super();
     this._ref = db.collection("gameLeaderboards");
 
-    this._dataRef = this._ref.doc(gameType.id).collection("dates");
+    this._dataRef = this._ref.doc(gameType.id).collection("data");
 
     this._interval = 1000 * 60 * 60 * 24;
   }
-
-  private getDateRefForDate(dateOrUtcYear: Date): DocumentReference;
-  private getDateRefForDate(dateOrUtcYear: number, utcMonth: number, utcDate: number): DocumentReference;
-  private getDateRefForDate(dateOrUtcYear: Date | number, utcMonth?: number, utcDate?: number): DocumentReference {
-    if(typeof dateOrUtcYear === 'number'){
-      return this.getDateRefForDate(new Date(Date.UTC(dateOrUtcYear, utcMonth, utcDate)))      
+ 
+  private getRefForDatePage(dateOrUtcYear: Date, page: number): DocumentReference;
+  private getRefForDatePage(dateOrUtcYear: number, utcMonth: number, utcDate: number, page: number): DocumentReference;
+  private getRefForDatePage(dateOrUtcYear: Date | number, utcMonthOrPage: number, utcDate?: number, page?: number): DocumentReference {
+    if (typeof dateOrUtcYear === 'number') {
+      return this.getRefForDatePage(new Date(Date.UTC(dateOrUtcYear, utcMonthOrPage, utcDate)), page)      
     }else{
-      return this._dataRef.doc(dateOrUtcYear.toISOString().substr(0,10)) // ISO Date (without time)
+      return this._dataRef.doc(`${dateOrUtcYear.toISOString().substr(0, 10)}-${utcMonthOrPage}`) // ISO Date (without time) + page number
     }
-  }
-
-  private getDateRefData(utcYear: number, utcMonth: number, utcDate: number): Promise<Map<string, any>>{
-    return this.getDateRefForDate(utcYear, utcMonth, utcDate)
-      .collection("pages")
-      .get()
-      .then((snap: QuerySnapshot) => 
-        snap.docs
-          // load data
-          .map(doc => doc.data().data)
-           // save data to map with uuids as key and undo the pagination
-          .reduce((map, doc) => doc.reduce((map, ele) => map.set(ele.uuid, ele), map), new Map())
-      )
   }
 
   async start() {
@@ -89,14 +76,12 @@ export class GameLeaderboardUpdater extends Updater {
         return res;
       });
 
-      const pageCol = this.getDateRefForDate(date.getFullYear(), date.getMonth(), date.getDate()).collection("pages");
-
       // paginate data in pages of 100 entries to be able to load multiple places at once to not make to many requests 
       // to firestore while at the same time not requesting to much data
       GameLeaderboardUpdater.paginate(convData, 100)
         // save pages to firestore
         .forEach((page,index) => {
-          pageCol.doc((index * 100).toString()).create({data: page});
+          this.getRefForDatePage(date.getFullYear(), date.getMonth(), date.getDate(), index).create({data: page});
         });
     } catch (err) {
       Updater.sendError(err, `leaderboard/${this.gameType.id}`);
