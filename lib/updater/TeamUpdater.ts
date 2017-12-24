@@ -1,4 +1,4 @@
-import { Player, Server } from "hive-api";
+import { Player, Server, Ranks } from "hive-api";
 import { Updater } from "./Updater"
 import { NotificationSender } from "../notifications/NotificationSender"
 import { database } from "firebase-admin";
@@ -42,11 +42,11 @@ export class TeamUpdater extends Updater {
 
     async updateInfo(){
         try {
-            let owners = await Server.owners(1000*60*10);
-            let developers = await Server.developers(1000*60*10);
-            let seniorModerators = await Server.seniorModerators(1000*60*10);
-            let moderators = await Server.moderators(1000*60*10);
-            let nectar = await Server.nectar(1000*60*10);
+            let owners = await Ranks.OWNER.listPlayers(1000*60*10);
+            let developers = await Ranks.DEVELOPER.listPlayers(1000*60*10);
+            let seniorModerators = await Ranks.SRMODERATOR.listPlayers(1000*60*10);
+            let moderators = await Ranks.MODERATOR.listPlayers(1000*60*10);
+            let nectar = await Ranks.NECTAR.listPlayers(1000*60*10);
 
             this._oldDataRef.once("value", snap => {
                 let data = snap.val();
