@@ -81,7 +81,11 @@ export class GameLeaderboardUpdater extends Updater {
       GameLeaderboardUpdater.paginate(convData, 100)
         // save pages to firestore
         .forEach((page,index) => {
-          this.getRefForDatePage(date.getFullYear(), date.getMonth(), date.getDate(), index).create({data: page});
+          this.getRefForDatePage(date.getFullYear(), date.getMonth(), date.getDate(), index).create({data: page}).catch(err => {
+            if(err.code == 6) return;
+
+            return err;
+          });
         });
     } catch (err) {
       Updater.sendError(err, `leaderboard/${this.gameType.id}`);

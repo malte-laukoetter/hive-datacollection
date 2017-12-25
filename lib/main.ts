@@ -1,5 +1,5 @@
 import { initializeApp, credential, database, firestore } from "firebase-admin";
-import { GameTypes, setMinTimeBetweenRequests, GameMap, Player} from "hive-api";
+import { GameTypes, setMinTimeBetweenRequests, GameMap, Player, Ranks} from "hive-api";
 
 import { TotalPointsUpdater } from "./updater/TotalPointsUpdater";
 import { TeamUpdater, ChangeType} from "./updater/TeamUpdater";
@@ -64,7 +64,12 @@ async function main() {
         process.exit();
     });
 
-    await GameTypes.update();
+    await Promise.all([
+        GameTypes.update(),
+        Ranks.update()
+    ]);
+
+    console.log("Updated Game and Rank lists.");    
 
     if(await Config.get("updater_active")){
         const teamUpdater = new TeamUpdater(db);
