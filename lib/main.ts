@@ -131,8 +131,6 @@ async function main() {
         }, 165 * 60 * 1000);
     }else{
         console.warn(`!!! DEBUG MODE !!!`)
-        new PlayerStatsUpdater(db).start()
-//        new GameLeaderboardUpdater(fireStore, GameTypes.BED).start();
     }
 }
 

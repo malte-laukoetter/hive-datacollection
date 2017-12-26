@@ -1,4 +1,4 @@
-import { TwitterBot } from "node-twitterbot";
+import * as Twitter from "twit";
 import { GameMap, Player, GameTypes, GameType } from 'hive-api';
 import { NotificationSubscriber } from './NotificationSubscriber';
 import { ChangeType } from "../updater/TeamUpdater";
@@ -7,17 +7,15 @@ import { MessageProvider } from "./MessageProvider";
 
 const sendWorldNameGameTypes = [GameTypes.BED.id, GameTypes.SKY.id, GameTypes.GNT.id];
 
-export class NotificationTwitterBot implements NotificationSubscriber {
-  private _bot: TwitterBot;
-
-  constructor(twitterBotSettings) {
-    this._bot = new TwitterBot(twitterBotSettings);
-  }
+export class NotificationTwitterBot extends Twitter implements NotificationSubscriber {
+/*  constructor(twitterBotSettings) {
+    super(twitterBotSettings);
+  }*/
 
   send(message) {
-    this._bot.tweet(message, err => {
-      if(err) console.error(err);
-    });
+    this.post('statuses/update', {status: message})
+    .then(res => console.log(res.data.statuses.map(a=>a.id_str)))
+    .catch(err => console.error(err));
   }
 
   async sendNewMap(map: GameMap) {
