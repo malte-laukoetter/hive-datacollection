@@ -108,7 +108,7 @@ export class NotificationTwitterBot extends Twitter implements NotificationSubsc
         message = `${message} is now a part of @TeamNectar 😀`;
         break;
       case ChangeType.NECTAR_REMOVE:
-        message += `is no longer a part of @TeamNectar ☹️`;
+        message += `is no longer active on @TeamNectar ☹️`;
         break;
       default:
         message += `is now something else on @theHiveMC but we don't know what 🤔`;

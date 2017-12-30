@@ -120,7 +120,7 @@ export class DiscordWebhook extends WebhookClient implements NotificationSubscri
         break;
       case ChangeType.NECTAR_REMOVE:
         title = 'Someone left Team Nectar';
-        body = `${player.name} is no longer a part of Team Nectar :(`;
+        body = `${player.name} is no longer active on Team Nectar :(`;
         break;
       default:
         title = 'Something changed in the team of the Hive';
