@@ -4,18 +4,31 @@ import { NotificationSubscriber } from './NotificationSubscriber';
 import { ChangeType } from "../updater/TeamUpdater";
 import { TwitterHandleProvider } from "./TwitterHandleProvider";
 import { MessageProvider } from "./MessageProvider";
+import { NotificationSender } from "./NotificationSender";
 
 const sendWorldNameGameTypes = [GameTypes.BED.id, GameTypes.SKY.id, GameTypes.GNT.id];
 
 export class NotificationTwitterBot extends Twitter implements NotificationSubscriber {
-/*  constructor(twitterBotSettings) {
-    super(twitterBotSettings);
-  }*/
+  tweetNotification: boolean = false;
+  
+  constructor(config){
+    super(config);
+    
+    if(config.tweetNotification) this.tweetNotification = true;
+  }
 
-  send(message) {
-    this.post('statuses/update', {status: message})
-    .then(res => console.log(res.data.statuses.map(a=>a.id_str)))
-    .catch(err => console.error(err));
+  async send(message) {
+    let a = this.post('statuses/update', {status: message});
+
+    try {
+      let data = await a.then(res => res.data).catch(console.error);
+      
+      if(this.tweetNotification){
+        NotificationSender.sendTweet(data);
+      }
+    }catch(err ){
+      console.log(err);
+    }
   }
 
   async sendNewMap(map: GameMap) {
@@ -141,6 +154,10 @@ export class NotificationTwitterBot extends Twitter implements NotificationSubsc
     }else{
       throw new Error(`Unknown Type: ` + type);
     }
+  }
+
+  sendTweet() {
+    // DO NOT DO SOMETHING HERE AS THIS COULD CREATE INFINITE RECURSION
   }
 }
 

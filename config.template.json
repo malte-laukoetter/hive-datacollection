@@ -9,7 +9,8 @@
         "id": "",
         "key": "",
         "sendNewMapMessage": true,
-        "sendTeamChangeMessage": true
+        "sendTeamChangeMessage": true,
+        "sendTweets": false
       }
     ]
   },
@@ -19,7 +20,8 @@
         "access_token": "",
         "access_token_secret": "",
         "consumer_key": "",
-        "consumer_secret": ""
+        "consumer_secret": "",
+        "tweetNotification": false
       }
     ],
     "handles": {

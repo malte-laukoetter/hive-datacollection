@@ -146,6 +146,7 @@ function initDiscordWebhooks(){
         discordWebhook.hiveEmojiId = settings.hiveEmojiId;
         discordWebhook.doSendNewMaps = settings.sendNewMapMessage;
         discordWebhook.doSendTeamChange = settings.sendTeamChangeMessage;
+        discordWebhook.doSendTweets = settings.sendTweets;
         discordWebhook.mapGameTypes = settings.mapGameTypes;
 
         discordWebhooks.set(key, discordWebhook);

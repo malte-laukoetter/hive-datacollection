@@ -8,6 +8,7 @@ const sendWorldNameGameTypes = [GameTypes.BED.id, GameTypes.SKY.id, GameTypes.GN
 export class DiscordWebhook extends WebhookClient implements NotificationSubscriber {
   private _doSendTeamChange: boolean = true;
   private _doSendNewMaps: boolean = true;
+  private _doSendTweets: boolean = false;
   private _mapGameTypes: String[] = [];
   hiveEmojiId: String = ''
 
@@ -41,6 +42,16 @@ export class DiscordWebhook extends WebhookClient implements NotificationSubscri
 
   get doSendNewMaps(){
     return this._doSendNewMaps;
+  }
+
+  set doSendTweets(send: boolean){
+    if(send !== undefined){
+      this._doSendTweets = send;
+    }
+  }
+
+  get doSendTweets(){
+    return this._doSendTweets;
   }
 
   constructor(id: string, key: string){
@@ -137,4 +148,10 @@ export class DiscordWebhook extends WebhookClient implements NotificationSubscri
   }
 
   sendCount(type, count: Number){}
+
+  sendTweet(data) {
+    if (this.doSendTweets) {
+      this.send(`https://twitter.com/${data.user.screen_name}/status/${data.id_str}`);
+    }
+  }
 }

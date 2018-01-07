@@ -25,6 +25,10 @@ export class NotificationSender {
     NotificationSender.subscriptions.forEach(sub => sub.sendNewMap(map));
   }
 
+  static sendTweet(tweetData) {
+    NotificationSender.subscriptions.forEach(sub => sub.sendTweet(tweetData));
+  }
+
  static sendTeamChange(player: Player, type: ChangeType) {
    NotificationSender.subscriptions.forEach(sub => sub.sendTeamChange(player, type));
   }

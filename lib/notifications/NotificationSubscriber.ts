@@ -6,4 +6,5 @@ export interface NotificationSubscriber {
   sendNewMap(map: GameMap);
   sendTeamChange(player: Player, type: ChangeType);
   sendCount(type, count: Number);
+  sendTweet(tweetData);
 }
