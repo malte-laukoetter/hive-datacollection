@@ -17,13 +17,13 @@ export class NotificationTwitterBot extends Twitter implements NotificationSubsc
     if(config.tweetNotification) this.tweetNotification = true;
   }
 
-  async send(message) {
+  async send(message, sendNotification=true) {
     let a = this.post('statuses/update', {status: message});
 
     try {
       let data = await a.then(res => res.data).catch(console.error);
       
-      if(this.tweetNotification){
+      if (this.tweetNotification && sendNotification){
         NotificationSender.sendTweet(data);
       }
     }catch(err ){
@@ -77,7 +77,7 @@ export class NotificationTwitterBot extends Twitter implements NotificationSubsc
       message += adv;
     }
 
-    this.send(message);
+    this.send(message, false);
   }
 
   async sendTeamChange(player: Player, type: ChangeType) {
@@ -143,14 +143,14 @@ export class NotificationTwitterBot extends Twitter implements NotificationSubsc
       message += 'team';
     }
 
-    this.send(message);
+    this.send(message, false);
   }
 
   async sendCount(type, count: Number) {
     if(type === "uniquePlayers"){
-      this.send(await MessageProvider.uniquePlayerTwitterMessage(count));
+      this.send(await MessageProvider.uniquePlayerTwitterMessage(count), true);
     }else if(type.name){
-      this.send(await MessageProvider.uniquePlayerGameTypeTwitterMessage(count, type));
+      this.send(await MessageProvider.uniquePlayerGameTypeTwitterMessage(count, type), true);
     }else{
       throw new Error(`Unknown Type: ` + type);
     }
