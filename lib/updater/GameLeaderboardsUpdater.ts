@@ -8,6 +8,7 @@ import { GameType, Leaderboard, LeaderboardPlace } from "hive-api";
 import { Updater } from "./Updater";
 import { Config } from "../config/Config";
 import { database, firestore } from "firebase-admin";
+import { compressToBase64 } from "lz-string";
 import { CollectionReference, DocumentReference, QuerySnapshot } from "@google-cloud/firestore";
 
 export class GameLeaderboardUpdater extends Updater {
@@ -81,7 +82,7 @@ export class GameLeaderboardUpdater extends Updater {
       GameLeaderboardUpdater.paginate(convData, 100)
         // save pages to firestore
         .forEach((page,index) => {
-          this.getRefForDatePage(date.getFullYear(), date.getMonth(), date.getDate(), index).create({data: page}).catch(err => {
+          this.getRefForDatePage(date.getFullYear(), date.getMonth(), date.getDate(), index).create({ a: Buffer.from(compressToBase64(JSON.stringify(page)), 'base64') }).catch(err => {
             if(err.code == 6) return;
 
             return err;

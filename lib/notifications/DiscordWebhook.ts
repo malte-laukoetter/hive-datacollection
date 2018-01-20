@@ -69,16 +69,16 @@ export class DiscordWebhook extends WebhookClient implements NotificationSubscri
     embed.addField("Game", map.gameType.name, true);
 
     if (sendWorldNameGameTypes.indexOf(map.gameType.id) === -1){
-      embed.addField("Map", (map.mapName || map.worldName), true);
+      embed.addField("Map", (map.mapName && map.mapName !== "UnknownMap" ? map.mapName : map.worldName), true);
     }else{
-      if(map.mapName){
+      if (map.mapName && map.mapName !== "UnknownMap"){
         embed.addField("Map", `${map.mapName} (${map.worldName})`, true);
       }else{
         embed.addField("Map", map.worldName, true);
       }
     }
 
-    if(map.author){
+    if (map.author && map.author !== "UnknownAuthor"){
       embed.addField("Created by", `*${map.author}*`, true);
     }
     embed.setFooter(`The map was just added to the API, it may take some time before you can play it on the server`);
