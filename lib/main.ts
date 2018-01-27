@@ -19,6 +19,7 @@ import { JsonConfig } from "./config/JsonConfig";
 import { FirebaseConfig } from "./config/FirebaseConfig";
 import { GameLeaderboardUpdater } from "./updater/GameLeaderboardsUpdater";
 import { Stats } from "./Stats";
+import { CurrPlayerUpdater } from "./updater/CurrPlayerUpdater";
 
 let configFile: any = { use_firebase: true, firebase_service_account: 'firebase_service_account.json' };
 try {
@@ -75,6 +76,7 @@ async function main() {
         const teamUpdater = new TeamUpdater(db);
         const mapUpdater = new MapUpdater(db);
         const uniquePlayerUpdater = new UniquePlayerUpdater(db);
+        const currPlayerUpdater = new CurrPlayerUpdater(db);
         const medalUpdater = new MedalUpdater(db);
         const tokenUpdater = new TokenUpdater(db);
         const gamePlayersUpdater = new GamePlayersUpdater(db);
@@ -92,6 +94,9 @@ async function main() {
 
         console.log("Starting UniquePlayerCount Updater");
         uniquePlayerUpdater.start();
+
+        console.log("Starting CurrPlayerCount Updater");
+        currPlayerUpdater.start();
 
         setTimeout(() => {
             console.log("Starting MedalUpdater");
