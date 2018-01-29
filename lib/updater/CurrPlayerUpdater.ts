@@ -10,9 +10,9 @@ export class CurrPlayerUpdater extends CountUpdater {
   constructor(db: database.Database) {
     super(db.ref("currPlayers"), "currPlayers");
 
-    this._highestCurrRef = db.ref("currPlayersCurr");
+    this._highestCurrRef = db.ref("highestPlayers");
 
-    this._interval = 1000 * 60 * 5;
+    this._interval = 1000 * 60 * 10;
   }
 
   async start(): Promise<any> {
@@ -31,7 +31,7 @@ export class CurrPlayerUpdater extends CountUpdater {
     return Server.currentPlayers(this._interval).then(amount => {
         this.sendNotification(amount);
 
-        if(this._highest < amount && this._highest > 0){
+        if (this._highest < amount && amount > 0){
           this._highestCurrRef.set(amount);
         }
 
