@@ -13,6 +13,7 @@ export class PlayerStatsUpdater extends Updater {
     prevWeeklyRef: database.Reference;
     currentMonthlyRef: database.Reference;
     prevMonthlyRef: database.Reference;
+    finishedRef: database.Reference;
 
     queue: Set<()=>void> = new Set();
 
@@ -30,6 +31,8 @@ export class PlayerStatsUpdater extends Updater {
         // not monthly but all 30 days
         this.currentMonthlyRef = this._ref.child("monthly").child((PlayerStatsUpdater.dayOfYear(new Date()) % 30).toString());
         this.prevMonthlyRef = this._ref.child("monthly").child(((PlayerStatsUpdater.dayOfYear(new Date()) - 1) % 30).toString());
+        
+        this.finishedRef = this._ref.child("finished");
 
         UpdateService.registerAllPlayerGameInfosUpdater((gameInfos, player, playerInfo) => this.update(gameInfos, player, playerInfo), "Player Stats Updater");
     }
@@ -39,7 +42,7 @@ export class PlayerStatsUpdater extends Updater {
 
         this.updateDataFromUpdateRef(10, this.currentWeeklyRef, this.prevMonthlyRef);
 
-        this.updateDataFromUpdateRef(12, this.currentMonthlyRef, null);
+        this.updateDataFromUpdateRef(12, this.currentMonthlyRef, this.finishedRef);
 
         setInterval(()=>{
             let f = this.queue.values().next().value;

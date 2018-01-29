@@ -10,7 +10,7 @@ export class CurrPlayerUpdater extends CountUpdater {
   constructor(db: database.Database) {
     super(db.ref("currPlayers"), "currPlayers");
 
-    this._highestCurrRef = db.ref("uniquePlayersCurr");
+    this._highestCurrRef = db.ref("currPlayersCurr");
 
     this._interval = 1000 * 60 * 5;
   }
