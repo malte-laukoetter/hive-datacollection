@@ -1,25 +1,25 @@
 import { initializeApp, credential, database, firestore } from "firebase-admin";
 import { GameTypes, setMinTimeBetweenRequests, GameMap, Player, Ranks} from "hive-api";
 
-import { TotalPointsUpdater } from "./updater/TotalPointsUpdater";
-import { TeamUpdater, ChangeType} from "./updater/TeamUpdater";
-import { MapUpdater } from "./updater/MapUpdater";
-import { AchievementUpdater } from "./updater/AchievementUpdater";
-import { TokenUpdater } from "./updater/TokenUpdater";
-import { MedalUpdater } from "./updater/MedalUpdater";
-import { GamePlayersUpdater } from "./updater/GamePlayersUpdater";
-import { PlayerStatsUpdater } from "./updater/PlayerStatsUpdater";
-import { TotalKillsUpdater } from "./updater/TotalKillsUpdater"
-import { UniquePlayerUpdater } from "./updater/UniquePlayerUpdater";
 import { DiscordWebhook } from "./notifications/DiscordWebhook";
 import { NotificationSender } from "./notifications/NotificationSender";
 import { NotificationTwitterBot } from "./notifications/TwitterBot";
 import { Config, ConfigEventType } from "./config/Config";
 import { JsonConfig } from "./config/JsonConfig";
 import { FirebaseConfig } from "./config/FirebaseConfig";
-import { GameLeaderboardUpdater } from "./updater/GameLeaderboardsUpdater";
 import { Stats } from "./Stats";
 import { CurrPlayerUpdater } from "./updater/CurrPlayerUpdater";
+import { Updater } from "./updater/Updater";
+import { AchievementUpdater } from "./updater/AchievementUpdater";
+import { GamePlayersUpdater } from "./updater/GamePlayersUpdater";
+import { MapUpdater } from "./updater/MapUpdater";
+import { MedalUpdater } from "./updater/MedalUpdater";
+import { PlayerStatsUpdater } from "./updater/PlayerStatsUpdater";
+import { TeamUpdater } from "./updater/TeamUpdater";
+import { TokenUpdater } from "./updater/TokenUpdater";
+import { TotalKillsUpdater } from "./updater/TotalKillsUpdater";
+import { UniquePlayerUpdater } from "./updater/UniquePlayerUpdater";
+import { GameLeaderboardUpdater } from "./updater/GameLeaderboardsUpdater";
 
 let configFile: any = { use_firebase: true, firebase_service_account: 'firebase_service_account.json' };
 try {
@@ -73,67 +73,41 @@ async function main() {
     console.log("Updated Game and Rank lists.");    
 
     if(await Config.get("updater_active")){
-        const teamUpdater = new TeamUpdater(db);
-        const mapUpdater = new MapUpdater(db);
-        const uniquePlayerUpdater = new UniquePlayerUpdater(db);
-        const currPlayerUpdater = new CurrPlayerUpdater(db);
-        const medalUpdater = new MedalUpdater(db);
-        const tokenUpdater = new TokenUpdater(db);
-        const gamePlayersUpdater = new GamePlayersUpdater(db);
-        const totalKillsUpdater = new TotalKillsUpdater(db);
-        const totalPointsUpdater = new TotalPointsUpdater(db);
-        const achievementUpdater = new AchievementUpdater(db);
-        const playerStatsUpdater = new PlayerStatsUpdater(db);
-        const gameLeaderboardUpdaters = GameTypes.list.map(type => new GameLeaderboardUpdater(fireStore, type));
+        const updaters: Set<Updater> = new Set();
+        updaters.add(new AchievementUpdater(db));
+        updaters.add(new CurrPlayerUpdater(db));
+        updaters.add(new GamePlayersUpdater(db));
+        updaters.add(new MapUpdater(db));
+        updaters.add(new MedalUpdater(db));
+        updaters.add(new PlayerStatsUpdater(db));
+        updaters.add(new TeamUpdater(db));
+        updaters.add(new TokenUpdater(db));
+        updaters.add(new TotalKillsUpdater(db));
+        updaters.add(new UniquePlayerUpdater(db));
 
-        console.log("Starting TeamUpdater");
-        teamUpdater.start();
+        await Promise.all([... updaters.values()].map(async updater => {
+            updater.startTime = (await Config.get(`updater.${updater.id}.startTime`) || -1);
 
-        console.log("Starting MapUpdater");
-        mapUpdater.start();
+            Config.on(`updater.${updater.id}.interval`, ConfigEventType.VALUE, val => updater.interval = val);
 
-        console.log("Starting UniquePlayerCount Updater");
-        uniquePlayerUpdater.start();
+            return;
+        }));
 
-        console.log("Starting CurrPlayerCount Updater");
-        currPlayerUpdater.start();
+        // initialising game leaderboard updaters extra as we only want one config for all
+        const gameLeaderboardsUpdaters = GameTypes.list.map(type => new GameLeaderboardUpdater(fireStore, type));
+        const gameLeaderboardsStartTime = (await Config.get(`updater.leaderboard_gametype.startTime`) || -1);
+        gameLeaderboardsUpdaters.forEach(updater => updater.startTime = gameLeaderboardsStartTime);
 
-        setTimeout(() => {
-            console.log("Starting MedalUpdater");
-            medalUpdater.start();
-            console.log("Starting TokensUpdater");
-            tokenUpdater.start();
-        }, 40 * 1000);
+        Config.on(`updater.leaderboard_gametype.interval`, ConfigEventType.VALUE, val => gameLeaderboardsUpdaters.forEach(updater => updater.interval = val));
 
-        setTimeout(() => {
-            console.log(`Starting ${gameLeaderboardUpdaters.length} GameLeaderboardUpdaters`);
-            gameLeaderboardUpdaters.forEach(updater => updater.start());
-        }, 5 * 60 * 1000);
+        gameLeaderboardsUpdaters.forEach(updater => updaters.add(updater));
 
-        setTimeout(() => {
-            console.log("Starting GamePlayersUpdater");
-            gamePlayersUpdater.start();
-        }, 8 * 60 * 1000);
 
-        setTimeout(() => {
-            console.log("Starting TotalKillsUpdater");
-            totalKillsUpdater.start();
-        }, 10 * 60 * 1000);
+        updaters.forEach(updater => {
+            updater.init();
+        });
 
-        setTimeout(() => {
-            console.log("Starting TotalPointsUpdater");
-            totalPointsUpdater.start();
-        }, 65 * 60 * 1000);
-
-        setTimeout(() => {
-            console.log("Starting AchievementUpdater");
-            achievementUpdater.start();
-        }, 125 * 60 * 1000);
-
-        setTimeout(() => {
-            console.log("Starting PlayerStatsUpdater");
-            playerStatsUpdater.start();
-        }, 165 * 60 * 1000);
+        console.log(`Initialized ${updaters.size} Updaters`);
     }else{
         console.warn(`!!! DEBUG MODE !!!`)
     }

@@ -3,8 +3,6 @@ import { Achievement, GameTypes, GameType, Player, PlayerGameInfo, PlayerInfo } 
 import { UpdateService } from "./UpdateService";
 import { database } from "firebase-admin";
 
-const ONE_DAY = 24*60*60*1000;
-
 export class PlayerStatsUpdater extends Updater {
     private _ref: database.Reference;
     dataRef: database.Reference;
@@ -16,6 +14,8 @@ export class PlayerStatsUpdater extends Updater {
     finishedRef: database.Reference;
 
     queue: Set<()=>void> = new Set();
+
+    readonly id = `playerstats`;
 
     constructor(db: database.Database) {
         super();
@@ -38,11 +38,11 @@ export class PlayerStatsUpdater extends Updater {
     }
 
     async start(): Promise<any> {
-        this.updateDataFromUpdateRef(14, this.dailyRef, this.prevWeeklyRef);
+        this.eachInterval(() => this.updateDataFromUpdateRef(14, this.dailyRef, this.prevWeeklyRef));
 
-        this.updateDataFromUpdateRef(10, this.currentWeeklyRef, this.prevMonthlyRef);
+        this.eachInterval(() => this.updateDataFromUpdateRef(10, this.currentWeeklyRef, this.prevMonthlyRef));
 
-        this.updateDataFromUpdateRef(12, this.currentMonthlyRef, this.finishedRef);
+        this.eachInterval(() => this.updateDataFromUpdateRef(12, this.currentMonthlyRef, this.finishedRef));
 
         setInterval(()=>{
             let f = this.queue.values().next().value;
@@ -112,7 +112,7 @@ export class PlayerStatsUpdater extends Updater {
         await this.addToQueue();
 
         try {
-            await UpdateService.requestAllPlayerGameInfosUpdate(player, ONE_DAY);
+            await UpdateService.requestAllPlayerGameInfosUpdate(player, this.interval);
 
             return true;
         }catch(err) {
@@ -177,6 +177,6 @@ export class PlayerStatsUpdater extends Updater {
     }
 
     static dayOfYear(date: Date){
-        return Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / ONE_DAY);
+        return Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / (24 * 60 * 60 * 1000));
     }
 }

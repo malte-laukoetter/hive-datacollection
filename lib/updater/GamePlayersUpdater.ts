@@ -4,28 +4,18 @@ import { database } from "firebase-admin";
 
 
 export class GamePlayersUpdater extends CountUpdater{
-    private _interval: number;
     private _currRef: database.Reference;
+    readonly id = `players_gametypes`;
 
     constructor(db: database.Database) {
         super(db.ref("gamemodeStats"));
 
         this._currRef = this._ref.child('curr');
-
-        this._interval = 1000 * 60 * 60;
-    }
-
-    async start(): Promise<any> {
-        this.updateInfo();
-
-        setInterval(() => this.updateInfo(), this._interval);
-
-        return null;
     }
 
     async updateInfo(){
         return Promise.all(GameTypes.list.map(async (gameType: GameType) => {
-            let players: number = await gameType.uniquePlayers(60*60*1000);
+            let players: number = await gameType.uniquePlayers(this.interval);
 
             this.sendNotification(players, gameType);
 

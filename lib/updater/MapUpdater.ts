@@ -1,15 +1,18 @@
 import { Player, Server, GameTypes, GameMap, GameType } from "hive-api";
-import { Updater } from "./Updater"
 import { NotificationSender } from "../notifications/NotificationSender"
 import { database } from "firebase-admin";
 import { Stats } from "../Stats";
+import { setTimeout } from "timers";
+import { BasicUpdater } from "./BasicUpdater";
+import { Updater } from "./Updater";
 
-export class MapUpdater extends Updater {
-  private _interval: number;
+export class MapUpdater extends BasicUpdater {
   private oldData: Map<String, string[]> = new Map();
   private _dataRef: database.Reference;
   private _oldDataRef: database.Reference;
   private _ref: database.Reference;
+
+  readonly id = `maps`;
 
   constructor(db: database.Database) {
     super();
@@ -17,20 +20,16 @@ export class MapUpdater extends Updater {
     this._ref = db.ref("maps");
     this._dataRef = this._ref.child("data");
     this._oldDataRef = this._ref.child("oldData");
-
-    this._interval = 1000 * 60 * 10;
   }
 
-  async start() {
+  async init() {
     await this.initUpdateInfo();
 
-    setInterval(() => this.updateInfo(), this._interval);
-
-    return null;
+    super.init();
   }
 
   async initUpdateInfo() {
-    await GameTypes.list.forEach(type => this.initUpdateInfoType(type));
+    await Promise.all(GameTypes.list.map(type => this.initUpdateInfoType(type)));
   }
 
   async initUpdateInfoType(type: GameType){
@@ -55,7 +54,7 @@ export class MapUpdater extends Updater {
 
   async updateInfoType(type: GameType){
     try {
-      let maps = await type.maps(this._interval);
+      let maps = await type.maps(this.interval);
 
       maps.filter(map => !this.oldData.has(type.id) || this.oldData.get(type.id).indexOf(map.worldName.toLowerCase()) === -1)
         .forEach(async map => this.addToList(map).catch(err => console.error(err + map.worldName)));

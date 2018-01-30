@@ -1,5 +1,5 @@
-import {Player} from "hive-api";
-import {Updater} from "./Updater";
+import { Player, PlayerInfo } from "hive-api";
+import { Updater } from "./Updater";
 import { UpdateService } from "./UpdateService";
 import { database } from "firebase-admin";
 
@@ -7,21 +7,18 @@ export abstract class LeaderboardUpdater extends Updater{
     protected _property: string;
     protected _limit: number;
     protected _intervalAll: number;
-    protected _intervalUpdate: number;
     protected _newPlayerRef: database.Reference;
     protected _dataRef: database.Reference;
     protected _ref: database.Reference;
 
     protected _waitingPlayers: Set<Player> = new Set();
 
-    constructor(ref: database.Reference, property: string, limit: number, intervalAll: number,
-                intervalUpdate: number){
+    constructor(ref: database.Reference, property: string, limit: number, intervalAll: number){
         super();
         this._ref = ref;
         this._property = property;
         this._limit = limit;
         this._intervalAll = intervalAll;
-        this._intervalUpdate = intervalUpdate;
         this._newPlayerRef = this._ref.child("newPlayers");
         this._dataRef = this._ref.child("data");
     }
@@ -54,12 +51,12 @@ export abstract class LeaderboardUpdater extends Updater{
                     setTimeout(()=>{
                         this._waitingPlayers.add(a.value);
                         return;
-                    }, this._intervalUpdate);
+                    }, this.interval);
                 }).catch((err: Error) => {
                     setTimeout(()=>{
                         this._waitingPlayers.add(a.value);
                         return;
-                    }, this._intervalUpdate);
+                    }, this.interval);
 
                     Updater.sendError(err, a.value.uuid);
                 });
@@ -68,4 +65,18 @@ export abstract class LeaderboardUpdater extends Updater{
     }
 
     abstract async requestUpdate(player: Player);
+}
+
+export abstract class PlayerInfoLeaderboardUpdater extends LeaderboardUpdater {
+    protected abstract update(info: PlayerInfo);
+
+    constructor(ref: database.Reference, property: string, limit: number = 100, intervalAll: number = 10*1000){
+        super(ref, property, limit, intervalAll);
+
+        UpdateService.registerPlayerInfoUpdater(info => this.update(info), this.id);
+    }
+
+    async requestUpdate(player: Player): Promise<any> {
+        return UpdateService.requestPlayerInfoUpdate(player, this.interval);
+    }
 }

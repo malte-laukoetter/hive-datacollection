@@ -5,13 +5,15 @@ import { database } from "firebase-admin";
 
 export class TotalPointsUpdater extends LeaderboardUpdater {
     private static readonly GAME_TYPES_WITH_POINTS: GameType[] = GameTypes.list.filter(type => type.playerGameInfoFactory.points !== undefined);
+    readonly id = `leaderboard_points`
+
     constructor(db: database.Database) {
-        super(db.ref("totalPointsLeaderboard"), "points", 100, 30*1000, 1000 * 60 * 60 * 6);
+        super(db.ref("totalPointsLeaderboard"), "points", 100, 30*1000);
 
         UpdateService.registerPlayerGameInfosUpdater(
             TotalPointsUpdater.GAME_TYPES_WITH_POINTS,
             (info, player, playerInfos) => this.update(info, player, playerInfos),
-            'Total Points Leaderboard'
+            this.id
         );
     }
 
@@ -25,7 +27,7 @@ export class TotalPointsUpdater extends LeaderboardUpdater {
     }
 
     async requestUpdate(player: Player): Promise<any> {
-        return UpdateService.requestPlayerGameInfosUpdate(TotalPointsUpdater.GAME_TYPES_WITH_POINTS, player, this._intervalUpdate)
+        return UpdateService.requestPlayerGameInfosUpdate(TotalPointsUpdater.GAME_TYPES_WITH_POINTS, player, this.interval)
     }
 }
 

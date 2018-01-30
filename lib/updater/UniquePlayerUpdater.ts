@@ -3,27 +3,19 @@ import { Server } from "hive-api";
 import { database } from "firebase-admin";
 
 export class UniquePlayerUpdater extends CountUpdater {
-  private _interval: number;
   private _currRef: database.Reference;
 
+  static id = "players_unique";
+  readonly id = UniquePlayerUpdater.id;
+
   constructor(db: database.Database) {
-    super(db.ref("uniquePlayers"), "uniquePlayers");
+    super(db.ref("uniquePlayers"));
 
     this._currRef = db.ref("uniquePlayersCurr");
-
-    this._interval = 1000 * 60 * 5;
-  }
-
-  async start(): Promise<any> {
-    this.updateInfo();
-
-    setInterval(() => this.updateInfo(), this._interval);
-
-    return null;
   }
 
   async updateInfo() {
-    return Server.uniquePlayers(this._interval).then(amount => {
+    return Server.uniquePlayers(this.interval).then(amount => {
         this.sendNotification(amount);
         this._currRef.set(amount);
         return this._ref.child(new Date().getTime().toString()).set(amount);

@@ -1,5 +1,5 @@
 import { PlayerInfo, Player, PlayerGameInfo, GameType, GameTypes } from 'hive-api';
-import { Updater } from '../updater/Updater';
+import { Updater } from './Updater';
 import { Stats } from '../Stats';
 
 export type PlayerInfoUpdateFunction = (playerInfo: PlayerInfo, player: Player) => void;

@@ -2,6 +2,7 @@ import { Player, Server, Ranks } from "hive-api";
 import { Updater } from "./Updater"
 import { NotificationSender } from "../notifications/NotificationSender"
 import { database } from "firebase-admin";
+import { BasicUpdater } from "./BasicUpdater";
 
 export enum ChangeType{
     MODERATOR_ADD = "MODERATOR_ADD",
@@ -16,11 +17,12 @@ export enum ChangeType{
     NECTAR_REMOVE = "NECTAR_REMOVE"
 }
 
-export class TeamUpdater extends Updater {
-    private _interval: number;
+export class TeamUpdater extends BasicUpdater {
     private _dataRef: database.Reference;
     private _oldDataRef: database.Reference;
     private _ref: database.Reference;
+
+    readonly id = `team`
 
     constructor(db: database.Database) {
         super();
@@ -28,25 +30,15 @@ export class TeamUpdater extends Updater {
         this._ref = db.ref("teamChanges");
         this._dataRef = this._ref.child("data");
         this._oldDataRef = this._ref.child("oldData");
-
-        this._interval = 1000 * 60 * 10;
-    }
-
-    async start() {
-        this.updateInfo();
-
-        setInterval(() => this.updateInfo(), this._interval);
-
-        return null;
     }
 
     async updateInfo(){
         try {
-            let owners = await Ranks.OWNER.listPlayers(1000*60*10);
-            let developers = await Ranks.DEVELOPER.listPlayers(1000*60*10);
-            let seniorModerators = await Ranks.SRMODERATOR.listPlayers(1000*60*10);
-            let moderators = await Ranks.MODERATOR.listPlayers(1000*60*10);
-            let nectar = await Ranks.NECTAR.listPlayers(1000*60*10);
+            let owners = await Ranks.OWNER.listPlayers(this.interval);
+            let developers = await Ranks.DEVELOPER.listPlayers(this.interval);
+            let seniorModerators = await Ranks.SRMODERATOR.listPlayers(this.interval);
+            let moderators = await Ranks.MODERATOR.listPlayers(this.interval);
+            let nectar = await Ranks.NECTAR.listPlayers(this.interval);
 
             this._oldDataRef.once("value", snap => {
                 let data = snap.val();

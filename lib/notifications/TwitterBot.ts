@@ -5,6 +5,7 @@ import { ChangeType } from "../updater/TeamUpdater";
 import { TwitterHandleProvider } from "./TwitterHandleProvider";
 import { MessageProvider } from "./MessageProvider";
 import { NotificationSender } from "./NotificationSender";
+import { UniquePlayerUpdater } from "../updater/UniquePlayerUpdater";
 
 const sendWorldNameGameTypes = [GameTypes.BED.id, GameTypes.SKY.id, GameTypes.GNT.id];
 
@@ -147,7 +148,7 @@ export class NotificationTwitterBot extends Twitter implements NotificationSubsc
   }
 
   async sendCount(type, count: Number) {
-    if(type === "uniquePlayers"){
+    if (type === UniquePlayerUpdater.id){
       this.send(await MessageProvider.uniquePlayerTwitterMessage(count), true);
     }else if(type.name){
       this.send(await MessageProvider.uniquePlayerGameTypeTwitterMessage(count, type), true);

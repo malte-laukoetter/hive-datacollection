@@ -6,14 +6,15 @@ import { database } from "firebase-admin";
 export class TotalKillsUpdater extends LeaderboardUpdater {
     private static readonly GAME_TYPES_WITH_KILLS: GameType[] = 
         [... GameTypes.list.filter(type => type.playerGameInfoFactory.kills !== undefined), GameTypes.HIDE];
+    readonly id = `leaderboard_kills`;
 
     constructor(db: database.Database) {
-        super(db.ref("totalKillsLeaderboard"), "kills", 100, 30*1000, 1000 * 60 * 60 * 6);
+        super(db.ref("totalKillsLeaderboard"), "kills", 100, 30*1000);
 
         UpdateService.registerPlayerGameInfosUpdater(
             TotalKillsUpdater.GAME_TYPES_WITH_KILLS,
             (info, player, playerInfos) => this.update(info, player, playerInfos),
-            'Total Kills Leaderboard'
+            this.id
         );
     }
 
@@ -35,7 +36,7 @@ export class TotalKillsUpdater extends LeaderboardUpdater {
     }
 
     async requestUpdate(player: Player): Promise<any> {
-        return UpdateService.requestPlayerGameInfosUpdate(TotalKillsUpdater.GAME_TYPES_WITH_KILLS, player, this._intervalUpdate)
+        return UpdateService.requestPlayerGameInfosUpdate(TotalKillsUpdater.GAME_TYPES_WITH_KILLS, player, this.interval)
     }
 }
 

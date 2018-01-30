@@ -42,5 +42,55 @@
       ]
     }
   },
+  "updater": {
+    "leaderboard_achievements": {
+      "interval": 86400000,
+      "startTime": 7500000
+    },
+    "leaderboard_gametypes": {
+      "interval": 86400000,
+      "startTime": 40000
+    },
+    "leaderboard_kills": {
+      "interval": 86400000,
+      "startTime": 600000
+    },
+    "leaderboard_medals": {
+      "interval": 86400000,
+      "startTime": 240000
+    },
+    "leaderboard_points": {
+      "interval": 86400000,
+      "startTime": 3900000
+    },
+    "leaderboard_tokens": {
+      "interval": 86400000,
+      "startTime": 240000
+    },
+    "maps": {
+      "interval": 600000,
+      "startTime": 1200
+    },
+    "players_current": {
+      "interval": 600000,
+      "startTime": 1000
+    },
+    "players_gametypes": {
+      "interval": 3600000,
+      "startTime": 480000
+    },
+    "players_unique": {
+      "interval": 600000,
+      "startTime": 1000
+    },
+    "playerstats": {
+      "interval": 86400000,
+      "startTime": 9900000
+    },
+    "team": {
+      "interval": 600000,
+      "startTime": 1000
+    }
+  },
   "updater_active": true
 }

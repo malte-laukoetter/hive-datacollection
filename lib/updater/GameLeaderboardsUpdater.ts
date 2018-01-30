@@ -10,19 +10,21 @@ import { Config } from "../config/Config";
 import { database, firestore } from "firebase-admin";
 import { compressToBase64 } from "lz-string";
 import { CollectionReference, DocumentReference, QuerySnapshot } from "@google-cloud/firestore";
+import { BasicUpdater } from "./BasicUpdater";
 
-export class GameLeaderboardUpdater extends Updater {
-  private _interval: number;
+export class GameLeaderboardUpdater extends BasicUpdater {
   private _dataRef: CollectionReference;
   private _ref: CollectionReference;
 
   constructor(db: firestore.Firestore, private readonly gameType: GameType) {
     super();
+
     this._ref = db.collection("gameLeaderboards");
-
     this._dataRef = this._ref.doc(gameType.id).collection("data");
+  }
 
-    this._interval = 1000 * 60 * 60 * 24;
+  get id() {
+    return `leaderboard_gametype_${this.gameType.id}`;
   }
  
   private getRefForDatePage(dateOrUtcYear: Date, page: number): DocumentReference;
@@ -33,14 +35,6 @@ export class GameLeaderboardUpdater extends Updater {
     }else{
       return this._dataRef.doc(`${dateOrUtcYear.toISOString().substr(0, 10)}-${utcMonthOrPage}`) // ISO Date (without time) + page number
     }
-  }
-
-  async start() {
-    this.updateInfo();
-
-    setInterval(() => this.updateInfo(), this._interval);
-
-    return null;
   }
 
   private static removeUnimportantRawData(raw: any){

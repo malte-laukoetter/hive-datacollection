@@ -1,8 +1,8 @@
-import { Updater } from "./Updater"
 import { NotificationSender } from "../notifications/NotificationSender"
 import { database } from "firebase-admin";
+import { BasicUpdater } from "./BasicUpdater";
 
-export abstract class CountUpdater extends Updater {
+export abstract class CountUpdater extends BasicUpdater {
   protected currentCount: Map<Object, Number> = new Map();
   // the expression at the end adds the 1.000.000 steps
   private readonly notificationPositions = [
@@ -17,16 +17,14 @@ export abstract class CountUpdater extends Updater {
     1500000,
     2500000
   ].concat([...Array(100).keys()].map(a => (1 + a) * 1000000));
-  private readonly countType;
   protected _ref: database.Reference;
 
-  constructor(ref: database.Reference, countType: String = ""){
+  constructor(ref: database.Reference){
     super();
     this._ref = ref;
-    this.countType = countType;
   }
 
-  protected sendNotification(count: Number, type = this.countType){
+  protected sendNotification(count: Number, type = this.id){
     let currentCount = this.currentCount.get(type) || 0;
 
     let number = this.notificationPositions.find(a => a < count && a > currentCount);
