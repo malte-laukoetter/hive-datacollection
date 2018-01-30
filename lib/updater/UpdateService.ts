@@ -30,6 +30,8 @@ export class UpdateService {
     return player
       .info(maxCacheAge)
       .then( info => {
+        Stats.track('player-info');
+
         UpdateService.playerInfoUpdater.forEach(
           updater => updater(info, player)
         );
@@ -72,6 +74,8 @@ export class UpdateService {
     return player
       .gameInfo(gameType, maxCacheAge)
       .then( info => {
+        Stats.track('player-info-gametype');
+        
         UpdateService.playerGameInfoUpdater.forEach(
           updater => updater(gameType, info, player)
         );

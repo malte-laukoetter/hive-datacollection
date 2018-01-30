@@ -7,7 +7,7 @@ export class AchievementUpdater extends LeaderboardUpdater {
     private static readonly GAME_TYPES_WITH_ACHIEVEMENTS: GameType[] = GameTypes.list.filter(type => type.playerGameInfoFactory.achievements !== undefined);
     protected _gamedataRef: database.Reference;
 
-    readonly id = `leaderboard_achievements`;
+    get id() { return `leaderboard_achievements`; }
 
     constructor(db: database.Database) {
         super(db.ref("achievementLeaderboard"), "achievements", 100, 30*1000);

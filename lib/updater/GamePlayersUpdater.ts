@@ -5,7 +5,7 @@ import { database } from "firebase-admin";
 
 export class GamePlayersUpdater extends CountUpdater{
     private _currRef: database.Reference;
-    readonly id = `players_gametypes`;
+    get id() { return `players_gametypes`; }
 
     constructor(db: database.Database) {
         super(db.ref("gamemodeStats"));

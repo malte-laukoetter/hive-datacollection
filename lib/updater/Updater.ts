@@ -65,12 +65,12 @@ export abstract class Updater {
         currInterval = this.interval;
 
         if(currInterval !== -1){
-          run = setInterval(updatingIntervalFunc, this.interval);
+          run = setInterval(() => updatingIntervalFunc(), this.interval);
         }
       }
     };
     
-    run = setInterval(updatingIntervalFunc, this.interval);
+    run = setInterval(() => updatingIntervalFunc(), this.interval);
   }
 
   static sendError(err, info) {

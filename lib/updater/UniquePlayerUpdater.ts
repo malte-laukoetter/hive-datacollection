@@ -6,7 +6,7 @@ export class UniquePlayerUpdater extends CountUpdater {
   private _currRef: database.Reference;
 
   static id = "players_unique";
-  readonly id = UniquePlayerUpdater.id;
+  get id() { return UniquePlayerUpdater.id; }
 
   constructor(db: database.Database) {
     super(db.ref("uniquePlayers"));

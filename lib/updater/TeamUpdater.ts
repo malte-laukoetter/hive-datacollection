@@ -22,7 +22,7 @@ export class TeamUpdater extends BasicUpdater {
     private _oldDataRef: database.Reference;
     private _ref: database.Reference;
 
-    readonly id = `team`
+    get id() { return `team`; }
 
     constructor(db: database.Database) {
         super();

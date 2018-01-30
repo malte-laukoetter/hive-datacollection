@@ -12,7 +12,7 @@ export class MapUpdater extends BasicUpdater {
   private _oldDataRef: database.Reference;
   private _ref: database.Reference;
 
-  readonly id = `maps`;
+  get id() { return `maps`; }
 
   constructor(db: database.Database) {
     super();
@@ -54,6 +54,8 @@ export class MapUpdater extends BasicUpdater {
 
   async updateInfoType(type: GameType){
     try {
+      Stats.track('map-update-gametype');
+
       let maps = await type.maps(this.interval);
 
       maps.filter(map => !this.oldData.has(type.id) || this.oldData.get(type.id).indexOf(map.worldName.toLowerCase()) === -1)

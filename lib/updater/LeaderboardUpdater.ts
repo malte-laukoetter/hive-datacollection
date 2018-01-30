@@ -19,22 +19,10 @@ export abstract class LeaderboardUpdater extends Updater{
         this._property = property;
         this._limit = limit;
         this._intervalAll = intervalAll;
-        this._newPlayerRef = this._ref.child("newPlayers");
         this._dataRef = this._ref.child("data");
     }
 
     async start(){
-        this._newPlayerRef.on("child_added", async snap => {
-            let player: Player = new Player(snap.key);
-
-            await UpdateService.requestPlayerInfoUpdate(player, 1000*60*60*24*30);
-
-            this.requestUpdate(player).then(()=>{
-                this._newPlayerRef.child(snap.key).remove();
-                return;
-            }).catch((err)=>console.error(`error while adding ${snap.key}: ${err.message}`));
-        });
-
         this._dataRef.orderByChild(this._property).limitToLast(this._limit).on("child_added", snap => {
             let player: Player = new Player(snap.key);
 

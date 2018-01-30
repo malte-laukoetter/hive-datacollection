@@ -15,7 +15,7 @@ export class PlayerStatsUpdater extends Updater {
 
     queue: Set<()=>void> = new Set();
 
-    readonly id = `playerstats`;
+    get id() { return `playerstats`; }
 
     constructor(db: database.Database) {
         super();
@@ -34,7 +34,7 @@ export class PlayerStatsUpdater extends Updater {
         
         this.finishedRef = this._ref.child("finished");
 
-        UpdateService.registerAllPlayerGameInfosUpdater((gameInfos, player, playerInfo) => this.update(gameInfos, player, playerInfo), "Player Stats Updater");
+        UpdateService.registerAllPlayerGameInfosUpdater((gameInfos, player, playerInfo) => this.update(gameInfos, player, playerInfo), this.id);
     }
 
     async start(): Promise<any> {

@@ -7,7 +7,8 @@ export class CurrPlayerUpdater extends CountUpdater {
   private _highest: number = 0;
 
   static id = "players_current";
-  readonly id = CurrPlayerUpdater.id;
+  get id() { return CurrPlayerUpdater.id; }
+
 
   constructor(db: database.Database) {
     super(db.ref("currPlayers"));

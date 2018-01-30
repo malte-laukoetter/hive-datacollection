@@ -5,7 +5,7 @@ import { database } from "firebase-admin";
 
 export class TotalPointsUpdater extends LeaderboardUpdater {
     private static readonly GAME_TYPES_WITH_POINTS: GameType[] = GameTypes.list.filter(type => type.playerGameInfoFactory.points !== undefined);
-    readonly id = `leaderboard_points`
+    get id() { return `leaderboard_points`; }
 
     constructor(db: database.Database) {
         super(db.ref("totalPointsLeaderboard"), "points", 100, 30*1000);

@@ -4,7 +4,7 @@ import { UpdateService } from "./UpdateService";
 import { database } from "firebase-admin";
 
 export class MedalUpdater extends PlayerInfoLeaderboardUpdater {
-    readonly id = `leaderboard_medals`
+    get id(){ return `leaderboard_medals`; }
 
     constructor(db: database.Database) {
         super(db.ref("medalLeaderboard"), "medals", 200);

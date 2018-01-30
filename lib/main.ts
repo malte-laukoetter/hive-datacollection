@@ -98,13 +98,17 @@ async function main() {
         const gameLeaderboardsStartTime = (await Config.get(`updater.leaderboard_gametype.startTime`) || -1);
         gameLeaderboardsUpdaters.forEach(updater => updater.startTime = gameLeaderboardsStartTime);
 
-        Config.on(`updater.leaderboard_gametype.interval`, ConfigEventType.VALUE, val => gameLeaderboardsUpdaters.forEach(updater => updater.interval = val));
+        Config.on(`updater.leaderboard_gametypes.interval`, ConfigEventType.VALUE, val => gameLeaderboardsUpdaters.forEach(updater => updater.interval = val));
 
         gameLeaderboardsUpdaters.forEach(updater => updaters.add(updater));
 
 
         updaters.forEach(updater => {
-            updater.init();
+            try {
+                updater.init();
+            }catch(err){
+                console.error(`Error with updater ${updater.id}`, err);
+            }
         });
 
         console.log(`Initialized ${updaters.size} Updaters`);

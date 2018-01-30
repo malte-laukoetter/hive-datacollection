@@ -6,7 +6,7 @@ import { database } from "firebase-admin";
 export class TotalKillsUpdater extends LeaderboardUpdater {
     private static readonly GAME_TYPES_WITH_KILLS: GameType[] = 
         [... GameTypes.list.filter(type => type.playerGameInfoFactory.kills !== undefined), GameTypes.HIDE];
-    readonly id = `leaderboard_kills`;
+    get id() { return `leaderboard_kills`; }
 
     constructor(db: database.Database) {
         super(db.ref("totalKillsLeaderboard"), "kills", 100, 30*1000);
