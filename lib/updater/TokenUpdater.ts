@@ -4,7 +4,7 @@ import { UpdateService } from "./UpdateService"
 import { database } from "firebase-admin";
 
 export class TokenUpdater extends PlayerInfoLeaderboardUpdater {
-    static readonly BLOCKED_RANKS = [Ranks.VIP, Ranks.DEVELOPER, Ranks.OWNER, Ranks.YOUTUBER, Ranks.STREAMER, Ranks.CONTRIBUTOR];
+    static readonly BLOCKED_RANKS = [Ranks.VIP, Ranks.DEVELOPER, Ranks.OWNER, Ranks.STAFFMANAGER, Ranks.YOUTUBER, Ranks.STREAMER, Ranks.CONTRIBUTOR];
     get id() { return `leaderboard_tokens`; }
 
     constructor(db: database.Database) {
