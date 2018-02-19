@@ -95,7 +95,7 @@ async function main() {
 
         // initialising game leaderboard updaters extra as we only want one config for all
         const gameLeaderboardsUpdaters = GameTypes.list.map(type => new GameLeaderboardUpdater(fireStore, type));
-        const gameLeaderboardsStartTime = (await Config.get(`updater.leaderboard_gametype.startTime`) || -1);
+        const gameLeaderboardsStartTime = (await Config.get(`updater.leaderboard_gametypes.startTime`) || -1);
         gameLeaderboardsUpdaters.forEach(updater => updater.startTime = gameLeaderboardsStartTime);
 
         Config.on(`updater.leaderboard_gametypes.interval`, ConfigEventType.VALUE, val => gameLeaderboardsUpdaters.forEach(updater => updater.interval = val));

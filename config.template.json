@@ -2,6 +2,7 @@
   "game_leaderboard_size": 200,
   "firebase_service_account": "firebase_service_account.json",
   "use_firebase": false,
+  "hypixel_api_key": "",
   "discord": {
     "webhooks": [
       {
