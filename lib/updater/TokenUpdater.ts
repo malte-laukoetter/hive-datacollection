@@ -12,7 +12,7 @@ export class TokenUpdater extends PlayerInfoLeaderboardUpdater {
     }
 
     update(info: PlayerInfo) {
-        if (TokenUpdater.BLOCKED_RANKS.filter(rank => rank.name == info.rank.name).length == 0 || info.tokens > 100000000) {
+        if (TokenUpdater.BLOCKED_RANKS.filter(rank => rank.name == info.rank.name).length == 0 && info.tokens < 100000000) {
             this._dataRef.child(info.uuid).update({
                 tokens: info.tokens,
                 name: info.name
