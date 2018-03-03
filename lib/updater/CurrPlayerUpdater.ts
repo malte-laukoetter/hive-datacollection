@@ -10,10 +10,10 @@ export class CurrPlayerUpdater extends CountUpdater {
   get id() { return CurrPlayerUpdater.id; }
 
 
-  constructor(db: database.Database) {
-    super(db.ref("currPlayers"));
+  constructor() {
+    super(database().ref("currPlayers"));
 
-    this._highestCurrRef = db.ref("highestPlayers");
+    this._highestCurrRef = database().ref("highestPlayers");
   }
 
   async start(): Promise<any> {

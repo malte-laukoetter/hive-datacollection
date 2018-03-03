@@ -1,9 +1,9 @@
 import { Player, PlayerInfo } from "hive-api";
-import { Updater } from "./Updater";
 import { UpdateService } from "./UpdateService";
 import { database } from "firebase-admin";
+import { Updater } from "lergins-bot-framework";
 
-export abstract class LeaderboardUpdater extends Updater{
+export abstract class LeaderboardUpdater extends Updater {
     protected _property: string;
     protected _limit: number;
     protected _intervalAll: number;

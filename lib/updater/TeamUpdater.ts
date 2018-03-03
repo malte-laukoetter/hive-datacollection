@@ -1,15 +1,10 @@
 import { Player, Server, Ranks } from "hive-api";
-import { Updater } from "./Updater"
 import { database } from "firebase-admin";
-import { BasicUpdater } from "./BasicUpdater";
-import { notificationSender } from "../bot";
-import * as bot from "../bot";
+import { notificationSender } from "../main";
 import { NotificationTypes } from "../notifications/NotificationTypes";
+import { BasicUpdater, Updater } from "lergins-bot-framework";
 
-console.log(notificationSender);
-console.log(bot)
-
-export enum ChangeType{
+export enum ChangeType {
     MODERATOR_ADD = "MODERATOR_ADD",
     MODERATOR_REMOVE = "MODERATOR_REMOVE",
     SENIOR_MODERATOR_ADD = "SENIOR_MODERATOR_ADD",
@@ -29,19 +24,16 @@ export class TeamUpdater extends BasicUpdater {
 
     get id() { return `team`; }
 
-    constructor(db: database.Database) {
+    constructor() {
         super();
 
-        this._ref = db.ref("teamChanges");
+        this._ref = database().ref("teamChanges");
         this._dataRef = this._ref.child("data");
         this._oldDataRef = this._ref.child("oldData");
     }
 
     async updateInfo(){
         try {
-
-            console.log(notificationSender);
-            console.log(bot)
             let owners = await Ranks.OWNER.listPlayers(this.interval);
             let developers = await Ranks.DEVELOPER.listPlayers(this.interval);
             let seniorModerators = await Ranks.SRMODERATOR.listPlayers(this.interval);

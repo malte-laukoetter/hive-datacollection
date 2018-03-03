@@ -5,22 +5,25 @@
  */
 
 import { GameType, Leaderboard, LeaderboardPlace } from "hive-api";
-import { Updater } from "./Updater";
 import { database, firestore } from "firebase-admin";
 import { compressToBase64 } from "lz-string";
 import { CollectionReference, DocumentReference, QuerySnapshot } from "@google-cloud/firestore";
-import { BasicUpdater } from "./BasicUpdater";
-import { config } from '../bot';
+import { config } from '../main';
+import { BasicUpdater, Updater } from "lergins-bot-framework";
 
 export class GameLeaderboardUpdater extends BasicUpdater {
   private _dataRef: CollectionReference;
   private _ref: CollectionReference;
 
-  constructor(db: firestore.Firestore, private readonly gameType: GameType) {
+  constructor(private readonly gameType: GameType) {
     super();
 
-    this._ref = db.collection("gameLeaderboards");
+    this._ref = firestore().collection("gameLeaderboards");
     this._dataRef = this._ref.doc(gameType.id).collection("data");
+  }
+
+  get configId() {
+    return "leaderboard_gametypes";
   }
 
   get id() {

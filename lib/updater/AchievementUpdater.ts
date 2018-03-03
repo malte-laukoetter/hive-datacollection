@@ -8,8 +8,8 @@ export class AchievementUpdater extends LeaderboardUpdater {
 
     get id() { return `leaderboard_achievements`; }
 
-    constructor(db: database.Database) {
-        super(db.ref("achievementLeaderboard"), "achievements", 100, 30*1000);
+    constructor() {
+        super(database().ref("achievementLeaderboard"), "achievements", 100, 30*1000);
 
         UpdateService.registerPlayerGameInfosUpdater(
             AchievementUpdater.GAME_TYPES_WITH_ACHIEVEMENTS,

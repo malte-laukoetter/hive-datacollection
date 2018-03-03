@@ -8,8 +8,8 @@ export class TotalKillsUpdater extends LeaderboardUpdater {
         [... GameTypes.list.filter(type => type.playerGameInfoFactory.kills !== undefined), GameTypes.HIDE];
     get id() { return `leaderboard_kills`; }
 
-    constructor(db: database.Database) {
-        super(db.ref("totalKillsLeaderboard"), "kills", 100, 30*1000);
+    constructor() {
+        super(database().ref("totalKillsLeaderboard"), "kills", 100, 30*1000);
 
         UpdateService.registerPlayerGameInfosUpdater(
             TotalKillsUpdater.GAME_TYPES_WITH_KILLS,

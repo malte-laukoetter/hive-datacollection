@@ -2,10 +2,9 @@ import { Player, Server, GameTypes, GameMap, GameType } from "hive-api";
 import { database } from "firebase-admin";
 import { Stats } from "../Stats";
 import { setTimeout } from "timers";
-import { BasicUpdater } from "./BasicUpdater";
-import { Updater } from "./Updater";
-import { notificationSender } from "../bot";
+import { notificationSender } from "../main";
 import { NotificationTypes } from "../notifications/NotificationTypes";
+import { BasicUpdater, Updater } from "lergins-bot-framework";
 
 export class MapUpdater extends BasicUpdater {
   private oldData: Map<String, string[]> = new Map();
@@ -15,10 +14,10 @@ export class MapUpdater extends BasicUpdater {
 
   get id() { return `maps`; }
 
-  constructor(db: database.Database) {
+  constructor() {
     super();
     
-    this._ref = db.ref("maps");
+    this._ref = database().ref("maps");
     this._dataRef = this._ref.child("data");
     this._oldDataRef = this._ref.child("oldData");
   }

@@ -1,5 +1,5 @@
 import { GameMap, Player, GameTypes, GameType } from 'hive-api';
-import { config } from '../bot';
+import { config } from '../main';
 
 export class MessageProvider{
   static async uniquePlayerTwitterMessage(amount){

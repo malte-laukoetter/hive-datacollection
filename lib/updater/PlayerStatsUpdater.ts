@@ -1,7 +1,7 @@
-import { Updater } from "./Updater";
 import { Achievement, GameTypes, GameType, Player, PlayerGameInfo, PlayerInfo } from "hive-api";
 import { UpdateService } from "./UpdateService";
 import { database } from "firebase-admin";
+import { Updater } from "lergins-bot-framework";
 
 export class PlayerStatsUpdater extends Updater {
     private _ref: database.Reference;
@@ -17,10 +17,10 @@ export class PlayerStatsUpdater extends Updater {
 
     get id() { return `playerstats`; }
 
-    constructor(db: database.Database) {
+    constructor() {
         super();
 
-        this._ref = db.ref("playerStats");
+        this._ref = database().ref("playerStats");
         this.dataRef = this._ref.child("data");
         this.dailyRef = this._ref.child("daily");
         this.currentWeeklyRef = this._ref.child("weekly").child(new Date().getDay().toString());

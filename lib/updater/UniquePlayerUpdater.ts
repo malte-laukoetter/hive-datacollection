@@ -8,10 +8,10 @@ export class UniquePlayerUpdater extends CountUpdater {
   static id = "players_unique";
   get id() { return UniquePlayerUpdater.id; }
 
-  constructor(db: database.Database) {
-    super(db.ref("uniquePlayers"));
+  constructor() {
+    super(database().ref("uniquePlayers"));
 
-    this._currRef = db.ref("uniquePlayersCurr");
+    this._currRef = database().ref("uniquePlayersCurr");
   }
 
   async updateInfo() {

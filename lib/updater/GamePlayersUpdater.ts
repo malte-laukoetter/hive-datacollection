@@ -7,8 +7,8 @@ export class GamePlayersUpdater extends CountUpdater{
     private _currRef: database.Reference;
     get id() { return `players_gametypes`; }
 
-    constructor(db: database.Database) {
-        super(db.ref("gamemodeStats"));
+    constructor() {
+        super(database().ref("gamemodeStats"));
 
         this._currRef = this._ref.child('curr');
     }

@@ -7,8 +7,8 @@ export class TokenUpdater extends PlayerInfoLeaderboardUpdater {
     static readonly BLOCKED_RANKS = [Ranks.VIP, Ranks.DEVELOPER, Ranks.OWNER, Ranks.STAFFMANAGER, Ranks.YOUTUBER, Ranks.STREAMER, Ranks.CONTRIBUTOR];
     get id() { return `leaderboard_tokens`; }
 
-    constructor(db: database.Database) {
-        super(db.ref("tokenLeaderboard"), "tokens", 200);
+    constructor() {
+        super(database().ref("tokenLeaderboard"), "tokens", 200);
     }
 
     update(info: PlayerInfo) {

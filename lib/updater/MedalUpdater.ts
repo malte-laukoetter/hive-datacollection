@@ -6,8 +6,8 @@ import { database } from "firebase-admin";
 export class MedalUpdater extends PlayerInfoLeaderboardUpdater {
     get id(){ return `leaderboard_medals`; }
 
-    constructor(db: database.Database) {
-        super(db.ref("medalLeaderboard"), "medals", 200);
+    constructor() {
+        super(database().ref("medalLeaderboard"), "medals", 200);
     }
 
     update(info: PlayerInfo){

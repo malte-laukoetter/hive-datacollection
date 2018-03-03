@@ -5,7 +5,7 @@ import { MessageProvider } from "./MessageProvider";
 import { UniquePlayerUpdater } from "../updater/UniquePlayerUpdater";
 import { NotificationTypes } from "./NotificationTypes";
 import { TwitterBot as _TwitterBot } from "lergins-bot-framework";
-import { notificationSender } from "../bot";
+import { notificationSender } from "../main";
 
 const sendWorldNameGameTypes = [GameTypes.BED.id, GameTypes.SKY.id, GameTypes.GNT.id];
 

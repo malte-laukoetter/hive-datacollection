@@ -7,8 +7,8 @@ export class TotalPointsUpdater extends LeaderboardUpdater {
     private static readonly GAME_TYPES_WITH_POINTS: GameType[] = GameTypes.list.filter(type => type.playerGameInfoFactory.points !== undefined);
     get id() { return `leaderboard_points`; }
 
-    constructor(db: database.Database) {
-        super(db.ref("totalPointsLeaderboard"), "points", 100, 30*1000);
+    constructor() {
+        super(database().ref("totalPointsLeaderboard"), "points", 100, 30*1000);
 
         UpdateService.registerPlayerGameInfosUpdater(
             TotalPointsUpdater.GAME_TYPES_WITH_POINTS,

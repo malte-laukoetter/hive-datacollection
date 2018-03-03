@@ -1,7 +1,7 @@
 import { database } from "firebase-admin";
-import { BasicUpdater } from "./BasicUpdater";
 import { NotificationTypes } from "../notifications/NotificationTypes";
-import { notificationSender } from "../bot";
+import { notificationSender } from "../main";
+import { BasicUpdater } from "lergins-bot-framework";
 
 export abstract class CountUpdater extends BasicUpdater {
   protected currentCount: Map<Object, Number> = new Map();

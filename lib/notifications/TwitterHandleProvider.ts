@@ -1,7 +1,7 @@
 import { database } from "firebase-admin";
 import { Player } from "hive-api";
 import * as fetch from 'node-fetch';
-import { config } from '../bot';
+import { config } from '../main';
 
 const namemcUrl = `https://namemc.com/profile/`;
 

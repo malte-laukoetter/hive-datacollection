@@ -1,6 +1,6 @@
 import { PlayerInfo, Player, PlayerGameInfo, GameType, GameTypes } from 'hive-api';
-import { Updater } from './Updater';
 import { Stats } from '../Stats';
+import { Updater } from 'lergins-bot-framework';
 
 export type PlayerInfoUpdateFunction = (playerInfo: PlayerInfo, player: Player) => void;
 export type PlayerGameInfoUpdateFunction = (gameType: GameType, gameInfo: PlayerGameInfo, player: Player) => void;
