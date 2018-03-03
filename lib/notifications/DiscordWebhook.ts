@@ -1,16 +1,27 @@
 import { GameMap, Player, GameTypes, GameType } from "hive-api";
-import { WebhookClient, RichEmbed } from "discord.js";
+import { RichEmbed } from "discord.js";
+import { DiscordWebhook as _DiscordWebhook } from "lergins-bot-framework";
 import { ChangeType } from "../updater/TeamUpdater";
-import { NotificationSubscriber } from "./NotificationSubscriber";
+import { NotificationTypes } from "./NotificationTypes";
 
 const sendWorldNameGameTypes = [GameTypes.BED.id, GameTypes.SKY.id, GameTypes.GNT.id]
 
-export class DiscordWebhook extends WebhookClient implements NotificationSubscriber {
+export class DiscordWebhook extends _DiscordWebhook {
   private _doSendTeamChange: boolean = true;
   private _doSendNewMaps: boolean = true;
   private _doSendTweets: boolean = false;
   private _mapGameTypes: String[] = [];
   hiveEmojiId: String = ''
+
+  constructor(settings) {
+    super(settings);
+
+    this.hiveEmojiId = settings.hiveEmojiId;
+    this.doSendNewMaps = settings.sendNewMapMessage;
+    this.doSendTeamChange = settings.sendTeamChangeMessage;
+    this.doSendTweets = settings.sendTweets;
+    this.mapGameTypes = settings.mapGameTypes;
+  }
 
   private get hiveEmoji(): String{
     return this.hiveEmojiId.length > 2 ? `<:hive:${this.hiveEmojiId}>` : '';
@@ -54,8 +65,15 @@ export class DiscordWebhook extends WebhookClient implements NotificationSubscri
     return this._doSendTweets;
   }
 
-  constructor(id: string, key: string){
-    super(id, key);
+  update(key: string, data: any){
+    switch(key){
+      case NotificationTypes.NEW_MAP:
+        return this.sendNewMap(data);
+      case NotificationTypes.TEAM_CHANGE:
+        return this.sendTeamChange(data.player, data.type);
+      case NotificationTypes.TWEET:
+        return this.sendTweet(data);
+    }
   }
 
   sendNewMap(map: GameMap){
@@ -146,8 +164,6 @@ export class DiscordWebhook extends WebhookClient implements NotificationSubscri
 
     this.send(embed);
   }
-
-  sendCount(type, count: Number){}
 
   sendTweet(data) {
     if (this.doSendTweets) {

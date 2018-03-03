@@ -1,6 +1,7 @@
-import { NotificationSender } from "../notifications/NotificationSender"
 import { database } from "firebase-admin";
 import { BasicUpdater } from "./BasicUpdater";
+import { NotificationTypes } from "../notifications/NotificationTypes";
+import { notificationSender } from "../bot";
 
 export abstract class CountUpdater extends BasicUpdater {
   protected currentCount: Map<Object, Number> = new Map();
@@ -29,7 +30,7 @@ export abstract class CountUpdater extends BasicUpdater {
 
     let number = this.notificationPositions.find(a => a < count && a > currentCount);
     if (number && currentCount > 0){
-      NotificationSender.sendCount(type, number);
+      notificationSender().send(NotificationTypes.COUNT, {type: type, count: number});
     }
     this.currentCount.set(type, count);
   }

@@ -1,13 +1,12 @@
 import { GameMap, Player, GameTypes, GameType } from 'hive-api';
-
-import { Config } from '../config/Config'
+import { config } from '../bot';
 
 export class MessageProvider{
   static async uniquePlayerTwitterMessage(amount){
     const params: Map<string, string> = new Map();
     params.set("AMOUNT", MessageProvider.numFormat(amount));
 
-    let message = await Config.get("twitter.messages.uniquePlayerAmountServer").then(MessageProvider.randomElement);
+    let message = await config().get("twitter.messages.uniquePlayerAmountServer").then(MessageProvider.randomElement);
     message += "\n\nhttps://hive.lergin.de";
 
     return MessageProvider.replaceMessageParams(message, params);
@@ -20,10 +19,10 @@ export class MessageProvider{
 
     let messages: Promise<string[]>;
     
-    if (await Config.has(`twitter.messages.uniquePlayerAmountGameType.${gameType.id}`) && Math.random() > 0.2){
-      messages = Config.get(`twitter.messages.uniquePlayerAmountGameType.${gameType.id}`);
+    if (await config().hasPath(`twitter.messages.uniquePlayerAmountGameType.${gameType.id}`) && Math.random() > 0.2){
+      messages = config().get(`twitter.messages.uniquePlayerAmountGameType.${gameType.id}`);
     } else {
-      messages = Config.get(`twitter.messages.uniquePlayerAmountGameType.all`);
+      messages = config().get(`twitter.messages.uniquePlayerAmountGameType.all`);
     }
 
     let message: string = await messages.then(MessageProvider.randomElement);

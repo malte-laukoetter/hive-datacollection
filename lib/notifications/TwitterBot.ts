@@ -1,33 +1,44 @@
-import * as Twitter from "twit";
 import { GameMap, Player, GameTypes, GameType } from 'hive-api';
-import { NotificationSubscriber } from './NotificationSubscriber';
 import { ChangeType } from "../updater/TeamUpdater";
 import { TwitterHandleProvider } from "./TwitterHandleProvider";
 import { MessageProvider } from "./MessageProvider";
-import { NotificationSender } from "./NotificationSender";
 import { UniquePlayerUpdater } from "../updater/UniquePlayerUpdater";
+import { NotificationTypes } from "./NotificationTypes";
+import { TwitterBot as _TwitterBot } from "lergins-bot-framework";
+import { notificationSender } from "../bot";
 
 const sendWorldNameGameTypes = [GameTypes.BED.id, GameTypes.SKY.id, GameTypes.GNT.id];
 
-export class NotificationTwitterBot extends Twitter implements NotificationSubscriber {
+export class TwitterBot extends _TwitterBot {
   tweetNotification: boolean = false;
   
-  constructor(config){
-    super(config);
+  constructor(settings){
+    super(settings);
     
-    if(config.tweetNotification) this.tweetNotification = true;
+    if (settings.tweetNotification) this.tweetNotification = true;
+  }
+
+  update(key: string, data: any) {
+    switch (key) {
+      case NotificationTypes.NEW_MAP:
+        return this.sendNewMap(data);
+      case NotificationTypes.TEAM_CHANGE:
+        return this.sendTeamChange(data.player, data.type);
+      case NotificationTypes.COUNT:
+        return this.sendCount(data.type, data.count);
+    }
   }
 
   async send(message, sendNotification=true) {
-    let a = this.post('statuses/update', {status: message});
+    let a = super.send(message);
 
     try {
-      let data = await a.then(res => res.data).catch(console.error);
-      
       if (this.tweetNotification && sendNotification){
-        NotificationSender.sendTweet(data);
+        let data = await a.then(res => res.data).catch(console.error);
+      
+        notificationSender().send(NotificationTypes.TWEET, data);
       }
-    }catch(err ){
+    } catch(err) {
       console.log(err);
     }
   }
@@ -155,10 +166,6 @@ export class NotificationTwitterBot extends Twitter implements NotificationSubsc
     }else{
       throw new Error(`Unknown Type: ` + type);
     }
-  }
-
-  sendTweet() {
-    // DO NOT DO SOMETHING HERE AS THIS COULD CREATE INFINITE RECURSION
   }
 }
 

@@ -6,11 +6,11 @@
 
 import { GameType, Leaderboard, LeaderboardPlace } from "hive-api";
 import { Updater } from "./Updater";
-import { Config } from "../config/Config";
 import { database, firestore } from "firebase-admin";
 import { compressToBase64 } from "lz-string";
 import { CollectionReference, DocumentReference, QuerySnapshot } from "@google-cloud/firestore";
 import { BasicUpdater } from "./BasicUpdater";
+import { config } from '../bot';
 
 export class GameLeaderboardUpdater extends BasicUpdater {
   private _dataRef: CollectionReference;
@@ -56,7 +56,7 @@ export class GameLeaderboardUpdater extends BasicUpdater {
       // we don't want the data from yesterday as that is already saved (should actually have no effect as the programm should be restarted every day)
       leaderboard.deleteCache();
 
-      const leaderboardPlaces: Map<number, LeaderboardPlace> = await leaderboard.load(0, (await Config.get('game_leaderboard_size') || 1000));
+      const leaderboardPlaces: Map<number, LeaderboardPlace> = await leaderboard.load(0, (await config().get('game_leaderboard_size') || 1000));
 
       const date = new Date();
 

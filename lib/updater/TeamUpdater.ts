@@ -1,8 +1,13 @@
 import { Player, Server, Ranks } from "hive-api";
 import { Updater } from "./Updater"
-import { NotificationSender } from "../notifications/NotificationSender"
 import { database } from "firebase-admin";
 import { BasicUpdater } from "./BasicUpdater";
+import { notificationSender } from "../bot";
+import * as bot from "../bot";
+import { NotificationTypes } from "../notifications/NotificationTypes";
+
+console.log(notificationSender);
+console.log(bot)
 
 export enum ChangeType{
     MODERATOR_ADD = "MODERATOR_ADD",
@@ -34,6 +39,9 @@ export class TeamUpdater extends BasicUpdater {
 
     async updateInfo(){
         try {
+
+            console.log(notificationSender);
+            console.log(bot)
             let owners = await Ranks.OWNER.listPlayers(this.interval);
             let developers = await Ranks.DEVELOPER.listPlayers(this.interval);
             let seniorModerators = await Ranks.SRMODERATOR.listPlayers(this.interval);
@@ -109,7 +117,7 @@ export class TeamUpdater extends BasicUpdater {
         }
     }
 
-    async addToChangeList(player: Player, type: ChangeType){
+    async addToChangeList(player: Player, type: ChangeType) {
         await player.info();
 
         this._dataRef.push().set({
@@ -119,6 +127,6 @@ export class TeamUpdater extends BasicUpdater {
             type: type
         });
 
-        NotificationSender.sendTeamChange(player, type);
+        notificationSender().send(NotificationTypes.TEAM_CHANGE, {player: player, type: type});
     }
 }

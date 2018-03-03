@@ -1,10 +1,11 @@
 import { Player, Server, GameTypes, GameMap, GameType } from "hive-api";
-import { NotificationSender } from "../notifications/NotificationSender"
 import { database } from "firebase-admin";
 import { Stats } from "../Stats";
 import { setTimeout } from "timers";
 import { BasicUpdater } from "./BasicUpdater";
 import { Updater } from "./Updater";
+import { notificationSender } from "../bot";
+import { NotificationTypes } from "../notifications/NotificationTypes";
 
 export class MapUpdater extends BasicUpdater {
   private oldData: Map<String, string[]> = new Map();
@@ -84,7 +85,7 @@ export class MapUpdater extends BasicUpdater {
       let currentData = snap.val();
 
       if(currentData === null){
-        NotificationSender.sendNewMap(map);
+        notificationSender().send(NotificationTypes.NEW_MAP, map);
 
         return this._dataRef.child(map.worldName).set({
           date: new Date().getTime(),
