@@ -8,3 +8,4 @@ config.json
 config.prod.json
 heapdump-*
 deploy.js
+data.json

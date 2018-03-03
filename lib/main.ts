@@ -1,6 +1,6 @@
 import { initializeApp, credential, database, firestore } from "firebase-admin";
 import { GameTypes, setMinTimeBetweenRequests, GameMap, Player, Ranks} from "hive-api";
-import { BotFramework, ConfigEventType } from "lergins-bot-framework";
+import { BotFramework, ConfigEventType, Updater } from "lergins-bot-framework";
 import * as path from "path";
 
 import { DiscordWebhook } from "./notifications/DiscordWebhook";
@@ -17,7 +17,6 @@ import { TokenUpdater } from "./updater/TokenUpdater";
 import { TotalKillsUpdater } from "./updater/TotalKillsUpdater";
 import { UniquePlayerUpdater } from "./updater/UniquePlayerUpdater";
 import { GameLeaderboardUpdater } from "./updater/GameLeaderboardsUpdater";
-
 
 export const bot = new BotFramework.Builder()
     .configFolderPath(path.join(__dirname, '..'))
@@ -40,9 +39,9 @@ bot.addUpdater(new UniquePlayerUpdater())
 export default bot;
 export function config() { return bot.config() }
 export function notificationSender() { return bot.notificationSender() }
-export function addUpdater(updater) { return bot.addUpdater(updater) }
+export function addUpdater(updater: Updater) { return bot.addUpdater(updater) }
 export function start() { return bot.start() }
-export const send = bot.send
+export function send(type: string, message: any) { bot.send(type, message) }
 
 async function main() {
     setMinTimeBetweenRequests((await bot.config().get('min_time_between_requests')) || 1400);
