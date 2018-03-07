@@ -46,7 +46,7 @@ export class TwitterHandleProvider {
   private static async getHypixel(uuid){
     return fetch(`https://api.hypixel.net/player?key=${await config().get('hypixel_api_key')}&uuid=${uuid}`)
       .then(res => res.json())
-      .then(res => res ? res.success ? res.player.socialMedia.links.TWITTER : "" : "")
+      .then(res => res ? res.success ?  res.player ? res.player.socialMedia ? res.player.socialMedia.links ? res.player.socialMedia.links.TWITTER : "" : "" : "" : "": "")
       .then((res: string) => res.match(/(?<=twitter.com\/)\w{1,15}/gi))
       .then(res => res ? res[0] : "");
   }
