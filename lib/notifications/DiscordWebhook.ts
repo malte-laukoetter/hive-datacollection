@@ -162,7 +162,7 @@ export class DiscordWebhook extends _DiscordWebhook {
     embed.setTitle(`${this.hiveEmoji} ${title} ${this.hiveEmoji}`);
     embed.setDescription(body);
 
-    this.send(embed);
+    this.send({embed});
   }
 
   sendTweet(data) {
