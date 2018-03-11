@@ -46,8 +46,9 @@ export function send(type: string, message: any) { bot.send(type, message) }
 async function main() {
     setMinTimeBetweenRequests((await bot.config().get('min_time_between_requests')) || 1400);
     
-    process.on('SIGTERM', () => {
+    process.on('SIGTERM', async () => {
         Stats.print();
+        await Stats.saveToGoogleSheets();
         
         console.log(`Stopped!`);
         
