@@ -44,10 +44,6 @@ export class UpdateService {
         if (err.name === "FetchError") {
           return new Promise((resolve, reject) => {
             Stats.track('fetch-error-player-info');
-/*
-            setTimeout(() => {
-              resolve(UpdateService.requestPlayerInfoUpdate(player, maxCacheAge));
-            }, 60000);*/
           });
         } else {
           Updater.sendError(err, `player/${player.uuid}`);
@@ -86,10 +82,6 @@ export class UpdateService {
         if (err.name === "FetchError") {
           return new Promise((resolve, reject) => {
             Stats.track('fetch-error-player-game-info');
-/*
-            setTimeout(() => {
-              resolve(UpdateService.requestPlayerGameInfoUpdate(gameType, player, maxCacheAge));
-            }, 60000);*/
           });
         } else {
           Updater.sendError(err, `player/${player.uuid}/${gameType.id}`);
