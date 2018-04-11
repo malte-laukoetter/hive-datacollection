@@ -12,11 +12,13 @@ import { GamePlayersUpdater } from "./updater/GamePlayersUpdater";
 import { MapUpdater } from "./updater/MapUpdater";
 import { MedalUpdater } from "./updater/MedalUpdater";
 import { PlayerStatsUpdater } from "./updater/PlayerStatsUpdater";
-import { TeamUpdater } from "./updater/TeamUpdater";
+import { TeamUpdater, ChangeType } from "./updater/TeamUpdater";
 import { TokenUpdater } from "./updater/TokenUpdater";
 import { TotalKillsUpdater } from "./updater/TotalKillsUpdater";
 import { UniquePlayerUpdater } from "./updater/UniquePlayerUpdater";
 import { GameLeaderboardUpdater } from "./updater/GameLeaderboardsUpdater";
+import { NotificationTypes } from "./notifications/NotificationTypes";
+import { TotalPointsUpdater } from "./updater/TotalPointsUpdater";
 
 export const bot = new BotFramework.Builder()
     .configFolderPath(path.join(__dirname, '..'))
@@ -33,6 +35,7 @@ bot.addUpdater(new MedalUpdater())
 bot.addUpdater(new PlayerStatsUpdater())
 bot.addUpdater(new TeamUpdater())
 bot.addUpdater(new TokenUpdater())
+bot.addUpdater(new TotalPointsUpdater())
 bot.addUpdater(new TotalKillsUpdater())
 bot.addUpdater(new UniquePlayerUpdater())
 
