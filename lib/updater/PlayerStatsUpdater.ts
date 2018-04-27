@@ -110,67 +110,8 @@ export class PlayerStatsUpdater extends Updater {
             playerRef.child("medals").child(date).set(playerInfo.medals);
             playerRef.child("tokens").child(date).set(playerInfo.tokens);
 
-            // TNTDragon Hide and Seek Times to google sheets
-            if(gameInfos.has(GameTypes.HIDE)){
-                PlayerStatsUpdater.saveHnSToSheets(gameInfos.get(GameTypes.HIDE) as HidePlayerGameInfo, playerInfo).catch(err => console.error(err));
-            }
-
             return true;
         }
-    }
-
-    static async saveHnSToSheets(info: HidePlayerGameInfo, pl: PlayerInfo){
-        const oauth2Client = new OAuth2(
-            await bot.config().get('googleauth/client_secret'),
-            await bot.config().get('googleauth/client_key'),
-            await bot.config().get('googleauth/redirect_url')
-        );
-
-        oauth2Client.setCredentials({
-            access_token: await bot.config().get('googleauth/access_token'),
-            refresh_token: await bot.config().get('googleauth/refresh_token')
-        });
-
-        const values = [
-            new Date().getTime(),
-            pl.uuid,
-            pl.name,
-            pl.rank.id,
-            pl.tokens,
-            info.achievements.map(a => `${a.id}:${a.progress}:${a.unlockedAt}`).join(',') || "",
-            Object.entries(info.blockExperience).map(([key,val]) => `${key}:${val}`).join(',') || "",
-            info.blocks.join(','),
-            info.bookUpgrade,
-            info.deaths,
-            info.firstLogin,
-            info.gamesPlayed,
-            info.hiderKills,
-            info.lastLogin,
-            info.points,
-            Object.entries(info.rawBlockExperience).map(([key,val]) => `${key}:${val}`).join(',') || "",
-            info.seekerKills,
-            info.timeAlive,
-            info.title,
-            info.victories,
-        ]
-
-        let maxRow = values.length;
-
-        return promisify(sheets.spreadsheets.values.append)({
-            "spreadsheetId": '1LRfm1iNIgXWSwwwhQnYRwxcUdbYBu7g1MNA2p_E8bs0',
-            "range": `A:${String.fromCharCode(65 + maxRow)}`,
-            "includeValuesInResponse": "false",
-            "insertDataOption": "INSERT_ROWS",
-            "responseDateTimeRenderOption": "FORMATTED_STRING",
-            "responseValueRenderOption": "FORMATTED_VALUE",
-            "valueInputOption": "USER_ENTERED",
-            "resource": {
-                "values": [
-                    values
-                ]
-            },
-            auth: oauth2Client
-        })
     }
 
     async updatePlayerDate(player: Player): Promise<boolean> {

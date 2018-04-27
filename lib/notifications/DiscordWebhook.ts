@@ -101,7 +101,7 @@ export class DiscordWebhook extends _DiscordWebhook {
     }
     embed.setFooter(`The map was just added to the API, it may take some time before you can play it on the server`);
 
-    this.send(embed);
+    this.send({ embeds: [embed] });
   }
 
   sendTeamChange(player: Player, type: ChangeType){
@@ -162,7 +162,7 @@ export class DiscordWebhook extends _DiscordWebhook {
     embed.setTitle(`${this.hiveEmoji} ${title} ${this.hiveEmoji}`);
     embed.setDescription(body);
 
-    this.send(embed);
+    this.send({ embeds: [embed] });
   }
 
   sendTweet(data) {
