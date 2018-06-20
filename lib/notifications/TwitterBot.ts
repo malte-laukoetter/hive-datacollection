@@ -97,46 +97,46 @@ export class TwitterBot extends _TwitterBot {
     let twitterHandle = await TwitterHandleProvider.get(player);
 
     if (twitterHandle === player.name) {
-      message = `.@${player.name} `;
+      message = `.@${player.name}`;
     } else if (twitterHandle) {
-      message = `${player.name} (@${twitterHandle}) `;
+      message = `${player.name} (@${twitterHandle})`;
     } else {
-      message = `${player.name} `;
+      message = `${player.name}`;
     }
 
     switch (type) {
       case ChangeType.MODERATOR_ADD:
-        message += `is now a Moderator on @theHiveMC 🙂`;
+        message += ` is now a Moderator on @theHiveMC 🙂`;
         break;
       case ChangeType.MODERATOR_REMOVE:
-        message += `is no longer a Moderator on @theHiveMC ☹️`;
+        message += ` is no longer a Moderator on @theHiveMC ☹️`;
         break;
       case ChangeType.SENIOR_MODERATOR_ADD:
-        message += `is now a Senior Moderator on @theHiveMC 😃`;
+        message += ` is now a Senior Moderator on @theHiveMC 😃`;
         break;
       case ChangeType.SENIOR_MODERATOR_REMOVE:
-        message += `is no longer a Senior Moderator on @theHiveMC 😢`;
+        message += ` is no longer a Senior Moderator on @theHiveMC 😢`;
         break;
       case ChangeType.DEVELOPER_ADD:
         message = `🎉 ${message} is now a Developer on @theHiveMC 🎉`;
         break;
       case ChangeType.DEVELOPER_REMOVE:
-        message += `is no longer a Developer on @theHiveMC 😭`;
+        message += ` is no longer a Developer on @theHiveMC 😭`;
         break;
       case ChangeType.OWNER_ADD:
         message = `🎉🎉🎉 ${message} is now an Owner on @theHiveMC 🎉🎉🎉`;
         break;
       case ChangeType.OWNER_REMOVE:
-        message += `is no longer an Owner on @theHiveMC 😱`;
+        message += ` is no longer an Owner on @theHiveMC 😱`;
         break;
       case ChangeType.NECTAR_ADD:
         message = `${message} is now a part of @TeamNectar 😀`;
         break;
       case ChangeType.NECTAR_REMOVE:
-        message += `is no longer active on @TeamNectar ☹️`;
+        message += ` is no longer active on @TeamNectar ☹️`;
         break;
       default:
-        message += `is now something else on @theHiveMC but we don't know what 🤔`;
+        message += ` is now something else on @theHiveMC but we don't know what 🤔`;
         break;
     }
 
