@@ -1,4 +1,4 @@
-import { GameTypes, GameType, Player, Achievement, PlayerGameInfo, PlayerInfo } from "hive-api"
+import { GameTypes, GameType, Player, Achievement, PlayerGameInfo, PlayerInfo, PlayerGameInfoAchievements } from "hive-api"
 import { LeaderboardUpdater } from "./LeaderboardUpdater"
 import { UpdateService } from "./UpdateService";
 import { database } from "firebase-admin";
@@ -18,30 +18,25 @@ export class AchievementUpdater extends LeaderboardUpdater {
         );
     }
 
-    private update(gameInfos: Map<GameType, PlayerGameInfo>, player: Player, playerInfo: PlayerInfo){
-        let achievementCount: number = 0;        
+    private async update(gameInfos: Map<GameType, PlayerGameInfo>, player: Player, playerInfo: PlayerInfo){
+        let achievementCount: number = 0;
 
-        gameInfos.forEach((info: any, type: GameType) => {
-            // after 1.1.2010 so we only get unlocked
-            let gameTypeCount = 0;
+        for (const [, info] of gameInfos) {
+            if (info instanceof PlayerGameInfoAchievements) {
+                for (const achievement of info.achievements) {
+                    const achievementInfo = await achievement.info()
 
-            if (info.achievements) {
-                gameTypeCount =
-                    info.achievements.filter(a => a.unlockedAt.getTime() >= 1262300400000).length;
+                    // after 1.1.2010 so we only get unlocked
+                    if (!achievementInfo.noLongerOptainable && achievement.unlockedAt.getTime() >= 1262300400000) {
+                        achievementCount++
+                    }
+                }
             }
-
-            achievementCount += gameTypeCount;
-
-            return;
-        });
-
-        let globalCount = 0;
-
-        if (playerInfo.achievements) {
-            globalCount += playerInfo.achievements.filter(a => a.unlockedAt.getTime() >= 1262300400000).length;
         }
 
-        achievementCount += globalCount;
+        if (playerInfo.achievements) {
+            achievementCount += playerInfo.achievements.filter(a => a.unlockedAt.getTime() >= 1262300400000).length;
+        }
 
         this._dataRef.child(player.uuid).update({
             achievements: achievementCount,

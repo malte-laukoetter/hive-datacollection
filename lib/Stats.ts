@@ -40,7 +40,7 @@ export class Stats {
 
     let maxRow = 0;
 
-    for(let [key, row] of Object.entries(await bot.config().get("stats/key_to_row"))){
+    for(let [key, row] of Object.entries(await bot.config().get("stats/key_to_row") as [number])){
       if(maxRow < row){
         for(let i = 0; i < maxRow - row; i++){
           values.push();
