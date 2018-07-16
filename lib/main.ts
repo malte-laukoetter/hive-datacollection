@@ -1,6 +1,5 @@
-import { initializeApp, credential, database, firestore } from "firebase-admin";
-import { GameTypes, setMinTimeBetweenRequests, GameMap, Player, Ranks} from "hive-api";
-import { BotFramework, ConfigEventType, Updater } from "lergins-bot-framework";
+import { GameTypes, setMinTimeBetweenRequests, Ranks} from "hive-api";
+import { BotFramework, Updater } from "lergins-bot-framework";
 import * as path from "path";
 
 import { DiscordWebhook } from "./notifications/DiscordWebhook";
@@ -17,7 +16,6 @@ import { TokenUpdater } from "./updater/TokenUpdater";
 import { TotalKillsUpdater } from "./updater/TotalKillsUpdater";
 import { UniquePlayerUpdater } from "./updater/UniquePlayerUpdater";
 import { GameLeaderboardUpdater } from "./updater/GameLeaderboardsUpdater";
-import { NotificationTypes } from "./notifications/NotificationTypes";
 import { TotalPointsUpdater } from "./updater/TotalPointsUpdater";
 
 export const bot = new BotFramework.Builder()

@@ -22,13 +22,16 @@ export class AchievementUpdater extends LeaderboardUpdater {
         let achievementCount: number = 0;
 
         for (const [, info] of gameInfos) {
-            if (info instanceof PlayerGameInfoAchievements) {
-                for (const achievement of info.achievements) {
+            // instance of doesn't work with Interfaces so we need to use this workaround... :(
+            if ((info as any).achievements) {
+                const _info: PlayerGameInfoAchievements = info as any
+
+                for (const achievement of _info.achievements) {
                     const achievementInfo = await achievement.info()
 
                     // after 1.1.2010 so we only get unlocked
                     if (!achievementInfo.noLongerOptainable && achievement.unlockedAt.getTime() >= 1262300400000) {
-                        achievementCount++
+                        achievementCount = achievementCount + 1
                     }
                 }
             }
