@@ -17,6 +17,7 @@ import { TotalKillsUpdater } from "./updater/TotalKillsUpdater";
 import { UniquePlayerUpdater } from "./updater/UniquePlayerUpdater";
 import { GameLeaderboardUpdater } from "./updater/GameLeaderboardsUpdater";
 import { TotalPointsUpdater } from "./updater/TotalPointsUpdater";
+import { SwarmNetUpdater } from "./updater/SwarmNetUpdater";
 
 export const bot = new BotFramework.Builder()
     .configFolderPath(path.join(__dirname, '..'))
@@ -36,6 +37,7 @@ bot.addUpdater(new TokenUpdater())
 bot.addUpdater(new TotalPointsUpdater())
 bot.addUpdater(new TotalKillsUpdater())
 bot.addUpdater(new UniquePlayerUpdater())
+bot.addUpdater(new SwarmNetUpdater())
 
 export default bot;
 export function config() { return bot.config() }
