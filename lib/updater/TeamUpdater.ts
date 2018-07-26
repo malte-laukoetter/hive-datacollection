@@ -112,6 +112,9 @@ export class TeamUpdater extends BasicUpdater {
     async addToChangeList(player: Player, type: ChangeType) {
         await player.info();
 
+        // no team change notifications for clankstars test account
+        if(player.uuid === '0b7f57840bb44fcf9748b66d61feef29') return;
+
         this._dataRef.push().set({
             date: new Date().getTime(),
             name: player.name,
