@@ -18,6 +18,7 @@ import { UniquePlayerUpdater } from "./updater/UniquePlayerUpdater";
 import { GameLeaderboardUpdater } from "./updater/GameLeaderboardsUpdater";
 import { TotalPointsUpdater } from "./updater/TotalPointsUpdater";
 import { SwarmNetUpdater } from "./updater/SwarmNetUpdater";
+import { HideBlocklevelUpdater } from "./updater/HideBlockLevelUpdater";
 
 export const bot = new BotFramework.Builder()
     .configFolderPath(path.join(__dirname, '..'))
@@ -36,6 +37,7 @@ bot.addUpdater(new TeamUpdater())
 bot.addUpdater(new TokenUpdater())
 bot.addUpdater(new TotalPointsUpdater())
 bot.addUpdater(new TotalKillsUpdater())
+bot.addUpdater(new HideBlocklevelUpdater())
 bot.addUpdater(new UniquePlayerUpdater())
 bot.addUpdater(new SwarmNetUpdater())
 

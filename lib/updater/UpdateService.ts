@@ -3,12 +3,11 @@ import { Stats } from '../Stats';
 import { Updater } from 'lergins-bot-framework';
 
 export type PlayerInfoUpdateFunction = (playerInfo: PlayerInfo, player: Player) => void;
-export type PlayerGameInfoUpdateFunction = (gameType: GameType, gameInfo: PlayerGameInfo, player: Player) => void;
+export type PlayerGameInfoUpdateFunction = (gameInfo: PlayerGameInfo, player: Player, playerInfo: PlayerInfo) => void;
 export type PlayerGameInfosUpdateFunction = (gameInfos: Map<GameType, PlayerGameInfo>, player: Player, playerInfo: PlayerInfo) => void;
 
 export class UpdateService {
   private static playerInfoUpdater: Set<PlayerInfoUpdateFunction> = new Set();
-  private static playerGameInfoUpdater: Set<PlayerGameInfoUpdateFunction> = new Set();
   private static playerGameInfosUpdater: Set<{ types: GameType[], func: PlayerGameInfosUpdateFunction, lastCalls: Map<string, number> }> = new Set();
 
   private static playerGameInfosCache: Map<string, Map<GameType, PlayerGameInfo>> = new Map();
@@ -51,9 +50,9 @@ export class UpdateService {
       });
   }
 
-  static registerPlayerGameInfoUpdater(updateFunction: PlayerGameInfoUpdateFunction, name = updateFunction.name){
-    console.log(`Registered PlayerGameInfoUpdater: ${name}`);
-    UpdateService.playerGameInfoUpdater.add(updateFunction);
+  static registerPlayerGameInfoUpdater(gameType: GameType, updateFunction: PlayerGameInfoUpdateFunction, name = updateFunction.name){
+    console.log(`Registered PlayerGameInfoUpdater: ${name} for ${gameType.id}`);
+    UpdateService.playerGameInfosUpdater.add({ types: [gameType], func: (gameInfos, player, playerInfo) => updateFunction(gameInfos.get(gameType), player, playerInfo), lastCalls: new Map() });
   }
 
   static registerPlayerGameInfosUpdater(gameTypes: GameType[], updateFunction: PlayerGameInfosUpdateFunction, name = updateFunction.name){
@@ -71,10 +70,6 @@ export class UpdateService {
       .gameInfo(gameType, maxCacheAge)
       .then( info => {
         Stats.track('player-info-gametype');
-        
-        UpdateService.playerGameInfoUpdater.forEach(
-          updater => updater(gameType, info, player)
-        );
 
         UpdateService.updatePlayerGameInfosCache(gameType, player, info);
       })

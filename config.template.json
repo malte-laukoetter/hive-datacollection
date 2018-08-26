@@ -64,6 +64,10 @@
       "interval": 86400000,
       "startTime": 3900000
     },
+    "leaderboard_hide_blocklevels": {
+      "interval": 86400000,
+      "startTime": 3000000
+    },
     "leaderboard_tokens": {
       "interval": 86400000,
       "startTime": 240000
