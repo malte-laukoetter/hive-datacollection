@@ -18,12 +18,14 @@ export class HideBlocklevelUpdater extends LeaderboardUpdater {
     }
 
     private update(gameInfo: HidePlayerGameInfo, player: Player, playerInfo: PlayerInfo) {
-        const totalExp = Object.values(gameInfo.blockExperience).reduce((acc: number, level: number) => acc + level, 0)
+        if(gameInfo.rawBlockExperience) {
+            const totalExp = Object.values(gameInfo.rawBlockExperience).reduce((acc: number, level: number) => acc + level, 0)
 
-        this._dataRef.child(player.uuid).update({
-            value: totalExp,
-            name: player.name
-        });
+            this._dataRef.child(player.uuid).update({
+                value: totalExp,
+                name: player.name
+            });
+        }
     }
 
     async requestUpdate(player: Player): Promise<any> {
