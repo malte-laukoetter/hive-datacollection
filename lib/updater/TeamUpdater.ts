@@ -1,6 +1,6 @@
 import { Player, Server, Ranks } from "hive-api";
 import { database } from "firebase-admin";
-import { notificationSender } from "../main";
+import { notificationSender, config } from "../main";
 import { NotificationTypes } from "../notifications/NotificationTypes";
 import { BasicUpdater, Updater } from "lergins-bot-framework";
 
@@ -17,10 +17,20 @@ export enum ChangeType {
     NECTAR_REMOVE = "NECTAR_REMOVE"
 }
 
+
+type TeamChangeEntry = {
+    date: number,
+    name: string,
+    uuid: string,
+    type: ChangeType
+}
+
 export class TeamUpdater extends BasicUpdater {
     private _dataRef: database.Reference;
     private _oldDataRef: database.Reference;
     private _ref: database.Reference;
+    private _unpublishedChanges: database.Reference;
+    private _neverPublishedChanges: database.Reference;
 
     get id() { return `team`; }
 
@@ -30,6 +40,21 @@ export class TeamUpdater extends BasicUpdater {
         this._ref = database().ref("teamChanges");
         this._dataRef = this._ref.child("data");
         this._oldDataRef = this._ref.child("oldData");
+        this._unpublishedChanges = this._ref.child("unpublishedChanges");
+        this._neverPublishedChanges = this._ref.child("neverPublishedChanges");
+    }
+
+    private async isChangeOldEnoughToPublish(change: TeamChangeEntry) {
+        const earliestPostTime = new Date().getTime() - await config().get('min_age_of_teamchange')
+        return change.date < earliestPostTime
+    }
+
+    private async sendTeamChange(change: TeamChangeEntry) {
+        const player = new Player(change.uuid)
+        player.name = change.name
+
+        this._dataRef.push().set(change);
+        notificationSender().send(NotificationTypes.TEAM_CHANGE, { player: player, type: change.type });
     }
 
     async updateInfo(){
@@ -40,7 +65,7 @@ export class TeamUpdater extends BasicUpdater {
             let moderators = await Ranks.MODERATOR.listPlayers(this.interval);
             let nectar = await Ranks.NECTAR.listPlayers(this.interval);
 
-            this._oldDataRef.once("value", snap => {
+            this._oldDataRef.once("value", async snap => {
                 let data = snap.val();
 
                 if(!data) return;
@@ -103,6 +128,55 @@ export class TeamUpdater extends BasicUpdater {
                     "moderators": moderators.map(player => player.uuid),
                     "nectar": nectar.map(player => player.uuid)
                 });
+
+                const unpublishedChanges: { [key: string]: TeamChangeEntry } = (await this._unpublishedChanges.once('value')).val()
+
+                for(let [key, change] of Object.entries(unpublishedChanges)) {
+                    if (await this.isChangeOldEnoughToPublish(change)) {
+                        let changeStillActive = false
+
+                        switch(change.type) {
+                            case ChangeType.MODERATOR_ADD:
+                                changeStillActive = moderatorsUuids.indexOf(change.uuid) !== -1
+                                break;
+                            case ChangeType.MODERATOR_REMOVE:
+                                changeStillActive = moderatorsUuids.indexOf(change.uuid) === -1
+                                break;
+                            case ChangeType.SENIOR_MODERATOR_ADD:
+                                changeStillActive = seniorModeratorsUuids.indexOf(change.uuid) !== -1
+                                break;
+                            case ChangeType.SENIOR_MODERATOR_REMOVE:
+                                changeStillActive = seniorModeratorsUuids.indexOf(change.uuid) === -1
+                                break;
+                            case ChangeType.DEVELOPER_ADD:
+                                changeStillActive = developersUuids.indexOf(change.uuid) !== -1
+                                break;
+                            case ChangeType.DEVELOPER_REMOVE:
+                                changeStillActive = developersUuids.indexOf(change.uuid) === -1
+                                break;
+                            case ChangeType.OWNER_ADD:
+                                changeStillActive = ownersUuids.indexOf(change.uuid) !== -1
+                                break;
+                            case ChangeType.OWNER_REMOVE:
+                                changeStillActive = ownersUuids.indexOf(change.uuid) === -1
+                                break;
+                            case ChangeType.NECTAR_ADD:
+                                changeStillActive = nectarUuids.indexOf(change.uuid) !== -1
+                                break;
+                            case ChangeType.NECTAR_REMOVE:
+                                changeStillActive = nectarUuids.indexOf(change.uuid) === -1
+                                break;
+                        }
+
+                        if (changeStillActive) {
+                            this.sendTeamChange(change)
+                        } else {
+                            this._neverPublishedChanges.child(key).set(change)
+                        }
+
+                        this._unpublishedChanges.child(key).remove()
+                    }
+                }
             })
         }catch(err){
             Updater.sendError(err, 'team');
@@ -115,13 +189,13 @@ export class TeamUpdater extends BasicUpdater {
         // no team change notifications for clankstars test account
         if(player.uuid === '0b7f57840bb44fcf9748b66d61feef29') return;
 
-        this._dataRef.push().set({
+        const changeEntry: TeamChangeEntry = {
             date: new Date().getTime(),
             name: player.name,
             uuid: player.uuid,
             type: type
-        });
+        }
 
-        notificationSender().send(NotificationTypes.TEAM_CHANGE, {player: player, type: type});
+        this._unpublishedChanges.push().set(changeEntry);
     }
 }
