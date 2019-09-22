@@ -44,6 +44,10 @@
     }
   },
   "updater": {
+    "names": {
+      "interval": 86400000,
+      "startTime": 0
+    },
     "leaderboard_achievements": {
       "interval": 86400000,
       "startTime": 7500000

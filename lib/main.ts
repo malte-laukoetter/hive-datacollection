@@ -19,6 +19,7 @@ import { GameLeaderboardUpdater } from "./updater/GameLeaderboardsUpdater";
 import { TotalPointsUpdater } from "./updater/TotalPointsUpdater";
 import { SwarmNetUpdater } from "./updater/SwarmNetUpdater";
 import { HideBlocklevelUpdater } from "./updater/HideBlockLevelUpdater";
+import { nameUpdater } from "./updater/NameUpdater";
 
 export const bot = new BotFramework.Builder()
     .configFolderPath(path.join(__dirname, '..'))
@@ -27,6 +28,7 @@ export const bot = new BotFramework.Builder()
     .forceFirebaseInit()
     .build();
 
+bot.addUpdater(nameUpdater)
 bot.addUpdater(new AchievementUpdater())
 bot.addUpdater(new CurrPlayerUpdater())
 bot.addUpdater(new GamePlayersUpdater())

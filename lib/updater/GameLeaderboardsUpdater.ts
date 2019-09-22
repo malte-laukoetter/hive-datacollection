@@ -10,6 +10,7 @@ import { compressToBase64 } from "lz-string";
 import { CollectionReference, DocumentReference, QuerySnapshot } from "@google-cloud/firestore";
 import { config } from '../main';
 import { BasicUpdater, Updater } from "lergins-bot-framework";
+import { nameUpdater } from "./NameUpdater";
 
 export class GameLeaderboardUpdater extends BasicUpdater {
   private _dataRef: CollectionReference;
@@ -64,7 +65,7 @@ export class GameLeaderboardUpdater extends BasicUpdater {
       const date = new Date();
 
       // convert data
-      const convData = [... leaderboardPlaces.values()].map((place: LeaderboardPlace) => {
+      const convData: {uuid: string, name: string, player: number, [key: string]: any}[] = [... leaderboardPlaces.values()].map((place: LeaderboardPlace) => {
         let res: any = GameLeaderboardUpdater.removeUnimportantRawData(place.raw);
 
         res.uuid = place.player.uuid;
@@ -85,6 +86,10 @@ export class GameLeaderboardUpdater extends BasicUpdater {
             return err;
           });
         });
+
+        convData.forEach(entry => {
+          nameUpdater.update(entry.uuid, entry.name)
+        })
     } catch (err) {
       Updater.sendError(err, `leaderboard/${this.gameType.id}`);
     }
