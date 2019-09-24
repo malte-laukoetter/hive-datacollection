@@ -74,20 +74,22 @@ export class PlayerStatsUpdater extends Updater {
             const gameInfosArr = [...gameInfos.values()]
         
             // save total achievements
-            playerRef.child("achievements").child("total").child(date).set(
-                PlayerStatsUpdater.countUnlockedAchievements(playerInfo, gameInfosArr)
-            );
+            const totalAchievements = PlayerStatsUpdater.countUnlockedAchievements(playerInfo, gameInfosArr)
+            playerRef.child("achievements").child("total").child(date).set(totalAchievements);
+            playerRef.child('data').child("achievements").child("total").set(totalAchievements);
         
             // save total points
-            playerRef.child("points").child("total").child(date).set(
-                PlayerStatsUpdater.countTotalPoints(gameInfosArr)
-            );
+            const totalPoints = PlayerStatsUpdater.countTotalPoints(gameInfosArr)
+            playerRef.child("points").child("total").child(date).set(totalPoints);
+            playerRef.child('data').child("points").child("total").set(totalPoints);
+
 
             // save points for each gametype
             gameInfosArr
                 .filter(info => info.hasOwnProperty("points"))
                 .forEach(info => {
-                        playerRef.child("points").child(info.type.id).child(date).set(info.points)
+                    playerRef.child("points").child(info.type.id).child(date).set(info.points)
+                    playerRef.child('data').child("points").child(info.type.id).set(info.points);
                 });
 
             // save achievement count for each gametype
@@ -98,17 +100,22 @@ export class PlayerStatsUpdater extends Updater {
                     let count = (info.achievements as Achievement[]).filter(a => a.unlocked).length;
 
                     playerRef.child("achievements").child(info.type.id).child(date).set(count);
+                    playerRef.child('data').child("achievements").child(info.type.id).set(count);
                 });
 
             if (playerInfo.achievements) {
+                const count = playerInfo.achievements.filter(a => a.unlocked).length
                 // save global achievements
-                playerRef.child("achievements").child("global").child(date)
-                    .set(playerInfo.achievements.filter(a => a.unlocked).length);
+                playerRef.child("achievements").child("global").child(date).set(count);
+                playerRef.child('data').child("achievements").child('global').set(count);
+
             }
 
             // save medals and tokens
             playerRef.child("medals").child(date).set(playerInfo.medals);
+            playerRef.child('data').child("medals").set(playerInfo.medals);
             playerRef.child("tokens").child(date).set(playerInfo.tokens);
+            playerRef.child('data').child("tokens").set(playerInfo.tokens);
 
             return true;
         }
