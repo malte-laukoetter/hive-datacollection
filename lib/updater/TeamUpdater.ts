@@ -13,8 +13,6 @@ export enum ChangeType {
     DEVELOPER_REMOVE = "DEVELOPER_REMOVE",
     OWNER_ADD = "OWNER_ADD",
     OWNER_REMOVE = "OWNER_REMOVE",
-    NECTAR_ADD = "NECTAR_ADD",
-    NECTAR_REMOVE = "NECTAR_REMOVE"
 }
 
 
@@ -63,7 +61,6 @@ export class TeamUpdater extends BasicUpdater {
             let developers = await Ranks.DEVELOPER.listPlayers(this.interval);
             let seniorModerators = await Ranks.SRMODERATOR.listPlayers(this.interval);
             let moderators = await Ranks.MODERATOR.listPlayers(this.interval);
-            let nectar = await Ranks.NECTAR.listPlayers(this.interval);
 
             this._oldDataRef.once("value", async snap => {
                 let data = snap.val();
@@ -74,7 +71,6 @@ export class TeamUpdater extends BasicUpdater {
                 let oldDevelopers: string[] = data.developers || [];
                 let oldSeniorModerators: string[] = data.seniorModerators || [];
                 let oldModerators: string[] = data.moderators || [];
-                let oldNectar: string[] = data.nectar || [];
 
                 owners.filter(player => oldOwners.indexOf(player.uuid) === -1)
                     .forEach(async player => this.addToChangeList(player, ChangeType.OWNER_ADD));
@@ -87,9 +83,6 @@ export class TeamUpdater extends BasicUpdater {
 
                 moderators.filter(player => oldModerators.indexOf(player.uuid) === -1)
                     .forEach(async player => this.addToChangeList(player, ChangeType.MODERATOR_ADD));
-
-                nectar.filter(player => oldNectar.indexOf(player.uuid) === -1)
-                    .forEach(async player => this.addToChangeList(player, ChangeType.NECTAR_ADD));
 
                 let ownersUuids = owners.map(player => player.uuid);
                 oldOwners.filter(uuid => ownersUuids.indexOf(uuid) === -1)
@@ -116,17 +109,11 @@ export class TeamUpdater extends BasicUpdater {
                     ownersUuids.indexOf(uuid) === -1
                 ).forEach(async uuid => this.addToChangeList(new Player(uuid), ChangeType.MODERATOR_REMOVE));
                
-                let nectarUuids = nectar.map(player => player.uuid);
-                oldNectar.filter(uuid =>
-                    nectarUuids.indexOf(uuid) === -1
-                ).forEach(async uuid => this.addToChangeList(new Player(uuid), ChangeType.NECTAR_REMOVE));
-
                 this._oldDataRef.set({
                     "owners": owners.map(player => player.uuid),
                     "developers": developers.map(player => player.uuid),
                     "seniorModerators": seniorModerators.map(player => player.uuid),
                     "moderators": moderators.map(player => player.uuid),
-                    "nectar": nectar.map(player => player.uuid)
                 });
 
                 const unpublishedChanges: { [key: string]: TeamChangeEntry } = (await this._unpublishedChanges.once('value')).val()
@@ -159,12 +146,6 @@ export class TeamUpdater extends BasicUpdater {
                                 break;
                             case ChangeType.OWNER_REMOVE:
                                 changeStillActive = ownersUuids.indexOf(change.uuid) === -1
-                                break;
-                            case ChangeType.NECTAR_ADD:
-                                changeStillActive = nectarUuids.indexOf(change.uuid) !== -1
-                                break;
-                            case ChangeType.NECTAR_REMOVE:
-                                changeStillActive = nectarUuids.indexOf(change.uuid) === -1
                                 break;
                         }
 

@@ -143,14 +143,6 @@ export class DiscordWebhook extends _DiscordWebhook {
         title = 'An Owner left the Hive';
         body = `${player.name} is no longer an Owner o.O`;
         break;
-      case ChangeType.NECTAR_ADD:
-        title = 'New Team Nectar Member';
-        body = `${player.name} is now a member of Team Nectar!`;
-        break;
-      case ChangeType.NECTAR_REMOVE:
-        title = 'Someone left Team Nectar';
-        body = `${player.name} is no longer active on Team Nectar :(`;
-        break;
       default:
         title = 'Something changed in the team of the Hive';
         body = `${player.name} is now something else but we don't know what...`;

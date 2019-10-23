@@ -129,12 +129,6 @@ export class TwitterBot extends _TwitterBot {
       case ChangeType.OWNER_REMOVE:
         message += ` is no longer an Owner on @theHiveMC 😱`;
         break;
-      case ChangeType.NECTAR_ADD:
-        message = `${message} is now a part of @TeamNectar 😀`;
-        break;
-      case ChangeType.NECTAR_REMOVE:
-        message += ` is no longer active on @TeamNectar ☹️`;
-        break;
       default:
         message += ` is now something else on @theHiveMC but we don't know what 🤔`;
         break;
