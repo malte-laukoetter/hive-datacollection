@@ -136,13 +136,13 @@ export class TwitterBot extends _TwitterBot {
 
     let adv = `\n\nhttps://hive.lergin.de/`
 
-    if(message.length + adv.length + 'player/'.length + player.uuid.length <= 140){
+    if(message.length + adv.length + 'players/'.length + player.uuid.length <= 140){
       message += adv;
-      message += 'player/';
+      message += 'players/';
       message += player.uuid;
-    } else if (message.length + adv.length + 'player/'.length + player.name.length <= 140){
+    } else if (message.length + adv.length + 'players/'.length + player.name.length <= 140){
       message += adv;
-      message += 'player/';
+      message += 'players/';
       message += player.name
     } else if (message.length + adv.length + 'team'.length <= 140){
       message += adv;

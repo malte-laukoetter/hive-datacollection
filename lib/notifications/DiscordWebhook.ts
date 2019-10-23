@@ -150,7 +150,7 @@ export class DiscordWebhook extends _DiscordWebhook {
     }
 
     const embed = new RichEmbed();
-    embed.setURL("https://hive.lergin.de/team");
+    embed.setURL(`https://hive.lergin.de/players/${player.uuid}`);
     embed.setTitle(`${this.hiveEmoji} ${title} ${this.hiveEmoji}`);
     embed.setDescription(body);
 
