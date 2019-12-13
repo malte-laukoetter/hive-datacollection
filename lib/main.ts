@@ -20,6 +20,7 @@ import { TotalPointsUpdater } from "./updater/TotalPointsUpdater";
 import { SwarmNetUpdater } from "./updater/SwarmNetUpdater";
 import { HideBlocklevelUpdater } from "./updater/HideBlockLevelUpdater";
 import { nameUpdater } from "./updater/NameUpdater";
+import { GamesPlayedUpdater } from './updater/GamesPlayedUpdater';
 
 export const bot = new BotFramework.Builder()
     .configFolderPath(path.join(__dirname, '..'))
@@ -37,6 +38,7 @@ bot.addUpdater(new MedalUpdater())
 bot.addUpdater(new PlayerStatsUpdater())
 bot.addUpdater(new TeamUpdater())
 bot.addUpdater(new TokenUpdater())
+bot.addUpdater(new GamesPlayedUpdater())
 bot.addUpdater(new TotalPointsUpdater())
 bot.addUpdater(new TotalKillsUpdater())
 bot.addUpdater(new HideBlocklevelUpdater())
@@ -78,4 +80,4 @@ async function main() {
     }
 }
 
-main().catch(console.error);
+main().catch((e) => console.error(e));
