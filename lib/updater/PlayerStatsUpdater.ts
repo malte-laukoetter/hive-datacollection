@@ -44,7 +44,7 @@ export class PlayerStatsUpdater extends Updater {
     }
 
     async start(): Promise<any> {
-        this.eachInterval(() => this.updateDataFromUpdateRef(14, this.dailyRef, this.prevWeeklyRef));
+        this.eachInterval(() => this.updateDataFromUpdateRef(7, this.dailyRef, this.prevWeeklyRef));
 
         this.eachInterval(() => this.updateDataFromUpdateRef(10, this.currentWeeklyRef, this.prevMonthlyRef));
 
