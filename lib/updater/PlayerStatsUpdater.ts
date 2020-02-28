@@ -31,8 +31,8 @@ export class PlayerStatsUpdater extends Updater {
         this.dailyRef = this._ref.child("daily");
         this.currentWeeklyRef = this._ref.child("weekly").child(new Date().getDay().toString());
 
-        // weekly ref of next day (current day + 1 mod 7)
-        this.prevWeeklyRef = this._ref.child("weekly").child((new Date().getDay() % 7).toString());
+        // weekly ref of next day (current day - 1 mod 7)
+        this.prevWeeklyRef = this._ref.child("weekly").child(((new Date().getDay() - 1) % 7).toString());
 
         // not monthly but all 30 days
         this.currentMonthlyRef = this._ref.child("monthly").child((PlayerStatsUpdater.dayOfYear(new Date()) % 30).toString());
@@ -44,11 +44,11 @@ export class PlayerStatsUpdater extends Updater {
     }
 
     async start(): Promise<any> {
-        this.eachInterval(() => this.updateDataFromUpdateRef(7, this.dailyRef, this.prevWeeklyRef));
+        this.eachInterval(() => this.updateDataFromUpdateRef(3, this.dailyRef, this.prevWeeklyRef));
 
-        this.eachInterval(() => this.updateDataFromUpdateRef(10, this.currentWeeklyRef, this.prevMonthlyRef));
+        this.eachInterval(() => this.updateDataFromUpdateRef(5, this.currentWeeklyRef, this.prevMonthlyRef));
 
-        this.eachInterval(() => this.updateDataFromUpdateRef(12, this.currentMonthlyRef, this.finishedRef));
+        this.eachInterval(() => this.updateDataFromUpdateRef(18, this.currentMonthlyRef, this.finishedRef));
 
         setInterval(()=>{
             let f = this.queue.values().next().value;

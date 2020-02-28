@@ -61,7 +61,7 @@ export abstract class PlayerInfoLeaderboardUpdater extends LeaderboardUpdater {
     constructor(ref: database.Reference, property: string, limit: number = 100, intervalAll: number = 10*1000){
         super(ref, property, limit, intervalAll);
 
-        UpdateService.registerPlayerInfoUpdater(info => this.update(info), this.id);
+        UpdateService.registerPlayerInfoUpdater(info => this.update(info), (this as any).id);
     }
 
     async requestUpdate(player: Player): Promise<any> {
