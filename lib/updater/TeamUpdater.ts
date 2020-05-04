@@ -170,6 +170,9 @@ export class TeamUpdater extends BasicUpdater {
         // no team change notifications for clankstars test account
         if(player.uuid === '0b7f57840bb44fcf9748b66d61feef29') return;
 
+        // ignore sourmatts test account
+        if(player.uuid.toUpperCase() === '277A9729AAE0472096CA81980652FE57') return;
+
         const changeEntry: TeamChangeEntry = {
             date: new Date().getTime(),
             name: player.name,
