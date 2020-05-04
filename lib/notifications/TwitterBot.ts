@@ -106,10 +106,10 @@ export class TwitterBot extends _TwitterBot {
 
     switch (type) {
       case ChangeType.MODERATOR_ADD:
-        message += ` is now a Moderator on @theHiveMC 🙂`;
+        message += ` is now a Moderator or Helper on @theHiveMC 🙂`;
         break;
       case ChangeType.MODERATOR_REMOVE:
-        message += ` is no longer a Moderator on @theHiveMC ☹️`;
+        message += ` is no longer a Moderator or Helper on @theHiveMC ☹️`;
         break;
       case ChangeType.SENIOR_MODERATOR_ADD:
         message += ` is now a Senior Moderator on @theHiveMC 😃`;
