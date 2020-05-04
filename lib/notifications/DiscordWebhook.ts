@@ -113,11 +113,11 @@ export class DiscordWebhook extends _DiscordWebhook {
     switch (type) {
       case ChangeType.MODERATOR_ADD:
         title = 'New Moderator';
-        body = `${player.name} is now a Moderator!`;
+        body = `${player.name} is now a Moderator or Helper!`;
         break;
       case ChangeType.MODERATOR_REMOVE:
         title = 'A Moderator left the Team';
-        body = `${player.name} is no longer a Moderator :(`;
+        body = `${player.name} is no longer a Moderator or Helper :(`;
         break;
       case ChangeType.SENIOR_MODERATOR_ADD:
         title = 'New Senior Moderator';
