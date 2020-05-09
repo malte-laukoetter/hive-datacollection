@@ -36,7 +36,7 @@ export class PlayerStatsUpdater extends Updater {
 
         // not monthly but all 30 days
         this.currentMonthlyRef = this._ref.child("monthly").child((PlayerStatsUpdater.dayOfYear(new Date()) % 30).toString());
-        this.prevMonthlyRef = this._ref.child("monthly").child(((PlayerStatsUpdater.dayOfYear(new Date()) - 1) % 30).toString());
+        this.prevMonthlyRef = this._ref.child("monthly").child(((PlayerStatsUpdater.dayOfYear(new Date()) + 6) % 30).toString());
         
         this.finishedRef = this._ref.child("finished");
 
