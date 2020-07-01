@@ -1,4 +1,4 @@
-import { Achievement, GameTypes, GameType, Player, PlayerGameInfo, PlayerInfo, HidePlayerGameInfo } from "hive-api";
+import { Achievement, GameTypes, GameType, Player, PlayerGameInfo, PlayerInfo, HidePlayerGameInfo, OLD_GAME_TYPES } from "hive-api";
 import { UpdateService } from "./UpdateService";
 import { database } from "firebase-admin";
 import { Updater } from "lergins-bot-framework";
@@ -125,7 +125,7 @@ export class PlayerStatsUpdater extends Updater {
         await this.addToQueue();
 
         try {
-            await UpdateService.requestAllPlayerGameInfosUpdate(player, this.interval);
+            await UpdateService.requestPlayerGameInfosUpdate(GameTypes.list.filter(type => OLD_GAME_TYPES.map(({id}) => id).indexOf(type.id) === -1), player, this.interval)
 
             return true;
         }catch(err) {
