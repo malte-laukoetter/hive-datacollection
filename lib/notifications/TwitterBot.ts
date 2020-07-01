@@ -1,5 +1,4 @@
 import { GameMap, Player, GameTypes, GameType } from 'hive-api';
-import { ChangeType } from "../updater/TeamUpdater";
 import { TwitterHandleProvider } from "./TwitterHandleProvider";
 import { MessageProvider } from "./MessageProvider";
 import { UniquePlayerUpdater } from "../updater/UniquePlayerUpdater";
@@ -22,8 +21,6 @@ export class TwitterBot extends _TwitterBot {
     switch (key) {
       case NotificationTypes.NEW_MAP:
         return this.sendNewMap(data);
-      case NotificationTypes.TEAM_CHANGE:
-        return this.sendTeamChange(data.player, data.type);
       case NotificationTypes.COUNT:
         return this.sendCount(data.type, data.count);
     }
@@ -87,66 +84,6 @@ export class TwitterBot extends _TwitterBot {
 
     if (message.length + adv.length <= 140) {
       message += adv;
-    }
-
-    this.send(message, false);
-  }
-
-  async sendTeamChange(player: Player, type: ChangeType) {
-    let message = "";
-    let twitterHandle = await TwitterHandleProvider.get(player);
-
-    if (twitterHandle === player.name) {
-      message = `.@${player.name}`;
-    } else if (twitterHandle) {
-      message = `${player.name} (@${twitterHandle})`;
-    } else {
-      message = `${player.name}`;
-    }
-
-    switch (type) {
-      case ChangeType.MODERATOR_ADD:
-        message += ` is now a Moderator or Helper on @theHiveMC 🙂`;
-        break;
-      case ChangeType.MODERATOR_REMOVE:
-        message += ` is no longer a Moderator or Helper on @theHiveMC ☹️`;
-        break;
-      case ChangeType.SENIOR_MODERATOR_ADD:
-        message += ` is now a Senior Moderator on @theHiveMC 😃`;
-        break;
-      case ChangeType.SENIOR_MODERATOR_REMOVE:
-        message += ` is no longer a Senior Moderator on @theHiveMC 😢`;
-        break;
-      case ChangeType.DEVELOPER_ADD:
-        message = `🎉 ${message} is now a Developer on @theHiveMC 🎉`;
-        break;
-      case ChangeType.DEVELOPER_REMOVE:
-        message += ` is no longer a Developer on @theHiveMC 😭`;
-        break;
-      case ChangeType.OWNER_ADD:
-        message = `🎉🎉🎉 ${message} is now an Owner on @theHiveMC 🎉🎉🎉`;
-        break;
-      case ChangeType.OWNER_REMOVE:
-        message += ` is no longer an Owner on @theHiveMC 😱`;
-        break;
-      default:
-        message += ` is now something else on @theHiveMC but we don't know what 🤔`;
-        break;
-    }
-
-    let adv = `\n\nhttps://hive.lergin.de/`
-
-    if(message.length + adv.length + 'players/'.length + player.uuid.length <= 140){
-      message += adv;
-      message += 'players/';
-      message += player.uuid;
-    } else if (message.length + adv.length + 'players/'.length + player.name.length <= 140){
-      message += adv;
-      message += 'players/';
-      message += player.name
-    } else if (message.length + adv.length + 'team'.length <= 140){
-      message += adv;
-      message += 'team';
     }
 
     this.send(message, false);

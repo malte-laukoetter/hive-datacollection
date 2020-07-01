@@ -11,7 +11,6 @@ import { GamePlayersUpdater } from "./updater/GamePlayersUpdater";
 import { MapUpdater } from "./updater/MapUpdater";
 import { MedalUpdater } from "./updater/MedalUpdater";
 import { PlayerStatsUpdater } from "./updater/PlayerStatsUpdater";
-import { TeamUpdater, ChangeType } from "./updater/TeamUpdater";
 import { TokenUpdater } from "./updater/TokenUpdater";
 import { TotalKillsUpdater } from "./updater/TotalKillsUpdater";
 import { UniquePlayerUpdater } from "./updater/UniquePlayerUpdater";
@@ -36,7 +35,6 @@ bot.addUpdater(new GamePlayersUpdater())
 bot.addUpdater(new MapUpdater())
 bot.addUpdater(new MedalUpdater())
 bot.addUpdater(new PlayerStatsUpdater())
-bot.addUpdater(new TeamUpdater())
 bot.addUpdater(new TokenUpdater())
 bot.addUpdater(new GamesPlayedUpdater())
 bot.addUpdater(new TotalPointsUpdater())
