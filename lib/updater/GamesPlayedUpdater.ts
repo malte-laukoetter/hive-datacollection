@@ -5,7 +5,17 @@ import { database } from "firebase-admin";
 
 export class GamesPlayedUpdater extends LeaderboardUpdater {
     private static readonly GAME_TYPES_WITH_GAMES_PLAYED: GameType[] = 
-        GameTypes.list.filter(type => type.playerGameInfoFactory.gamesPlayed !== undefined);
+         [
+        GameTypes.BP,
+        GameTypes.DR,
+        GameTypes.HIDE,
+        GameTypes.SP,
+        GameTypes.TIMV,
+        GameTypes.SKY,
+        GameTypes.DRAW,
+        GameTypes.GRAV,
+        GameTypes.BED,
+      ].filter(type => type.playerGameInfoFactory.gamesPlayed !== undefined);
     get id() { return `leaderboard_games_played`; }
 
     constructor() {

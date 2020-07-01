@@ -5,7 +5,17 @@ import { database } from "firebase-admin";
 
 export class TotalKillsUpdater extends LeaderboardUpdater {
     private static readonly GAME_TYPES_WITH_KILLS: GameType[] = 
-        [... GameTypes.list.filter(type => type.playerGameInfoFactory.kills !== undefined), GameTypes.HIDE];
+        [...  [
+        GameTypes.BP,
+        GameTypes.DR,
+        GameTypes.HIDE,
+        GameTypes.SP,
+        GameTypes.TIMV,
+        GameTypes.SKY,
+        GameTypes.DRAW,
+        GameTypes.GRAV,
+        GameTypes.BED,
+      ].filter(type => type.playerGameInfoFactory.kills !== undefined), GameTypes.HIDE];
     get id() { return `leaderboard_kills`; }
 
     constructor() {

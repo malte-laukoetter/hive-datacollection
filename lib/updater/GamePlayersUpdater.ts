@@ -14,7 +14,17 @@ export class GamePlayersUpdater extends CountUpdater{
     }
 
     async updateInfo(){
-        return Promise.all(GameTypes.list.map(async (gameType: GameType) => {
+        return Promise.all( [
+        GameTypes.BP,
+        GameTypes.DR,
+        GameTypes.HIDE,
+        GameTypes.SP,
+        GameTypes.TIMV,
+        GameTypes.SKY,
+        GameTypes.DRAW,
+        GameTypes.GRAV,
+        GameTypes.BED,
+      ].map(async (gameType: GameType) => {
             let players: number = await gameType.uniquePlayers(this.interval);
 
             this.sendNotification(players, gameType);

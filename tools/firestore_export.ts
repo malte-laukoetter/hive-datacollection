@@ -25,7 +25,17 @@ async function main() {
 
   const obj: any = {};
   
-  Promise.all(GameTypes.list
+  Promise.all( [
+        GameTypes.BP,
+        GameTypes.DR,
+        GameTypes.HIDE,
+        GameTypes.SP,
+        GameTypes.TIMV,
+        GameTypes.SKY,
+        GameTypes.DRAW,
+        GameTypes.GRAV,
+        GameTypes.BED,
+      ]
     .map(gm => {
       return {
         id: gm.id,

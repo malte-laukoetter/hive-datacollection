@@ -4,7 +4,17 @@ import { UpdateService } from "./UpdateService";
 import { database } from "firebase-admin";
 
 export class TotalPointsUpdater extends LeaderboardUpdater {
-    private static readonly GAME_TYPES_WITH_POINTS: GameType[] = GameTypes.list.filter(type => type.playerGameInfoFactory.points !== undefined);
+    private static readonly GAME_TYPES_WITH_POINTS: GameType[] =  [
+        GameTypes.BP,
+        GameTypes.DR,
+        GameTypes.HIDE,
+        GameTypes.SP,
+        GameTypes.TIMV,
+        GameTypes.SKY,
+        GameTypes.DRAW,
+        GameTypes.GRAV,
+        GameTypes.BED,
+      ].filter(type => type.playerGameInfoFactory.points !== undefined);
     get id() { return `leaderboard_points`; }
 
     constructor() {

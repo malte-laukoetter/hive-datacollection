@@ -62,7 +62,17 @@ export class UpdateService {
 
   static registerAllPlayerGameInfosUpdater(updateFunction: PlayerGameInfosUpdateFunction, name = updateFunction.name){
     console.log(`Registered AllPlayerGameInfosUpdater: ${name}`);
-    UpdateService.playerGameInfosUpdater.add({ types: GameTypes.list, func: updateFunction, lastCalls: new Map() });
+    UpdateService.playerGameInfosUpdater.add({ types:  [
+        GameTypes.BP,
+        GameTypes.DR,
+        GameTypes.HIDE,
+        GameTypes.SP,
+        GameTypes.TIMV,
+        GameTypes.SKY,
+        GameTypes.DRAW,
+        GameTypes.GRAV,
+        GameTypes.BED,
+      ], func: updateFunction, lastCalls: new Map() });
   }
 
   static requestPlayerGameInfoUpdate(gameType: GameType, player: Player, maxCacheAge: number = 60 * 60 * 1000){
@@ -93,7 +103,21 @@ export class UpdateService {
   }
 
   static requestAllPlayerGameInfosUpdate(player: Player, maxCacheAge: number = 60 * 60 * 1000){
-    return UpdateService.requestPlayerGameInfosUpdate(GameTypes.list, player, maxCacheAge);
+    return UpdateService.requestPlayerGameInfosUpdate(
+      [
+        GameTypes.BP,
+        GameTypes.DR,
+        GameTypes.HIDE,
+        GameTypes.SP,
+        GameTypes.TIMV,
+        GameTypes.SKY,
+        GameTypes.DRAW,
+        GameTypes.GRAV,
+        GameTypes.BED,
+      ],
+      player,
+      maxCacheAge
+    );
   }
 
   private static updatePlayerGameInfosCache(gameType: GameType, player: Player, info: PlayerGameInfo){

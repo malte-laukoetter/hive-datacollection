@@ -125,7 +125,7 @@ export class PlayerStatsUpdater extends Updater {
         await this.addToQueue();
 
         try {
-            await UpdateService.requestPlayerGameInfosUpdate(GameTypes.list.filter(type => OLD_GAME_TYPES.map(({id}) => id).indexOf(type.id) === -1), player, this.interval)
+            await UpdateService.requestAllPlayerGameInfosUpdate(player, this.interval)
 
             return true;
         }catch(err) {

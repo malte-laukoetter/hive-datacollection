@@ -29,7 +29,17 @@ export class MapUpdater extends BasicUpdater {
   }
 
   async initUpdateInfo() {
-    await Promise.all(GameTypes.list.map(type => this.initUpdateInfoType(type)));
+    await Promise.all( [
+        GameTypes.BP,
+        GameTypes.DR,
+        GameTypes.HIDE,
+        GameTypes.SP,
+        GameTypes.TIMV,
+        GameTypes.SKY,
+        GameTypes.DRAW,
+        GameTypes.GRAV,
+        GameTypes.BED,
+      ].map(type => this.initUpdateInfoType(type)));
   }
 
   async initUpdateInfoType(type: GameType){
@@ -76,7 +86,17 @@ export class MapUpdater extends BasicUpdater {
   }
 
   async updateInfo() {
-    GameTypes.list.forEach(async type => this.updateInfoType(type));
+     [
+       GameTypes.BP,
+       GameTypes.DR,
+       GameTypes.HIDE,
+       GameTypes.SP,
+       GameTypes.TIMV,
+       GameTypes.SKY,
+       GameTypes.DRAW,
+       GameTypes.GRAV,
+       GameTypes.BED,
+     ].forEach(async (type) => this.updateInfoType(type));
   }
 
   async addToList(map: GameMap) {
