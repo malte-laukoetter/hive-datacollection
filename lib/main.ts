@@ -69,7 +69,17 @@ async function main() {
     
     console.log("Updated Game and Rank lists.");
     
-    GameTypes.list.forEach(type => bot.addUpdater(new GameLeaderboardUpdater(type)));
+     [
+       GameTypes.BP,
+       GameTypes.DR,
+       GameTypes.HIDE,
+       GameTypes.SP,
+       GameTypes.TIMV,
+       GameTypes.SKY,
+       GameTypes.DRAW,
+       GameTypes.GRAV,
+       GameTypes.BED,
+     ].forEach((type) => bot.addUpdater(new GameLeaderboardUpdater(type)));
 
     if(await config().get("updater_active")){
         bot.start();
