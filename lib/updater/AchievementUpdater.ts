@@ -10,7 +10,6 @@ export class AchievementUpdater extends LeaderboardUpdater {
            GameTypes.HIDE,
            GameTypes.SP,
            GameTypes.TIMV,
-           GameTypes.SKY,
            GameTypes.DRAW,
            GameTypes.GRAV,
            GameTypes.BED,
